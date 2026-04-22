@@ -1,0 +1,2761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="WireMock Mock Dashboard - WireMock Analytics and Monitoring">
+    <meta name="theme-color" content="#1E1B4B">
+    <link rel="icon" type="image/svg+xml" href="/__admin/favicon.svg">
+    <title>WireMock Mock Dashboard - WireMock Analytics</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+
+:root {
+    --color-primary: #4F46E5;
+    --color-primary-dark: #3730A3;
+    --color-primary-light: #EEF2FF;
+    --color-secondary: #0891B2;
+    --color-accent: #F97316;
+    --color-success: #16A34A;
+    --color-warning: #D97706;
+    --color-error: #DC2626;
+    --color-info: #4F46E5;
+    --color-white: #FFFFFF;
+    --color-gray-50: #F8F9FA;
+    --color-gray-100: #E9ECEF;
+    --color-gray-200: #DEE2E6;
+    --color-gray-300: #CED4DA;
+    --color-gray-400: #ADB5BD;
+    --color-gray-500: #6C757D;
+    --color-gray-600: #495057;
+    --color-gray-700: #343A40;
+    --color-gray-800: #212529;
+    --color-gray-900: #151515;
+    --color-text-primary: var(--color-gray-900);
+    --color-text-secondary: var(--color-gray-600);
+    --color-text-muted: var(--color-gray-500);
+    --color-bg-primary: var(--color-white);
+    --color-bg-secondary: var(--color-gray-50);
+    --color-border-light: var(--color-gray-200);
+    --color-border-medium: var(--color-gray-300);
+    --radius-sm: 4px;
+    --radius-base: 8px;
+    --radius-md: 12px;
+    --shadow-sm: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px 0 rgba(0,0,0,0.06);
+    --shadow-base: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    --font-mono: ui-monospace, 'Courier New', Courier, monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font: 14px -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Arial', sans-serif;
+    background: #0F0E1A;
+    color: var(--color-text-primary);
+    line-height: 1.5;
+    min-height: 100vh;
+    padding: 0 0 32px 0;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* Header - dark navbar */
+.header {
+    background: linear-gradient(135deg, #1E1B4B 0%, #312E81 100%);
+    border-bottom: 1px solid rgba(129,140,248,0.2);
+    padding: 0 24px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+
+.header-logo {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    filter: drop-shadow(0 0 8px rgba(249,115,22,0.5));
+}
+
+.header-text { flex: 1; }
+
+.header h1 {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 0;
+    letter-spacing: -0.2px;
+}
+
+.header .subtitle {
+    color: rgba(165,180,252,0.8);
+    font-size: 11px;
+    letter-spacing: 0.3px;
+}
+
+.header-home {
+    color: rgba(165,180,252,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px;
+    border-radius: var(--radius-sm);
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+    border: 1px solid rgba(129,140,248,0.2);
+}
+.header-home:hover {
+    color: #fff;
+    background: rgba(129,140,248,0.15);
+    border-color: rgba(129,140,248,0.5);
+}
+
+/* Tabs - pill style */
+.tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 20px;
+    background: #1A1830;
+    padding: 5px;
+    border-radius: 10px;
+    width: fit-content;
+    border: 1px solid rgba(129,140,248,0.12);
+}
+
+.tab {
+    padding: 7px 18px;
+    background: transparent;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(165,180,252,0.65);
+    transition: all var(--transition-fast);
+}
+
+.tab:hover {
+    color: #c7d2fe;
+    background: rgba(129,140,248,0.1);
+}
+
+.tab.active {
+    color: #fff;
+    background: var(--color-primary);
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(79,70,229,0.5);
+}
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Cards / Sections */
+.info-section {
+    background: #1A1830;
+    border: 1px solid rgba(129,140,248,0.15);
+    padding: 18px 22px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+}
+
+.info-section h2 {
+    color: #e0e7ff;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    border-bottom: 1px solid rgba(129,140,248,0.12);
+    padding-bottom: 10px;
+}
+
+.info-section h3 {
+    color: #c7d2fe;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 16px;
+    margin-bottom: 8px;
+}
+
+.info-section p {
+    color: #94a3b8;
+    line-height: 1.6;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+/* Endpoint Cards */
+.endpoints-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.endpoint-card {
+    background: #131225;
+    padding: 16px;
+    border-radius: 10px;
+    border-left: 3px solid var(--color-primary);
+    border: 1px solid rgba(129,140,248,0.12);
+    border-left: 3px solid #818cf8;
+}
+
+.endpoint-card .method {
+    display: inline-block;
+    background: rgba(79,70,229,0.2);
+    color: #a5b4fc;
+    padding: 2px 10px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 11px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.endpoint-card .method.post {
+    background: rgba(220,38,38,0.15);
+    color: #fca5a5;
+}
+
+.endpoint-card .url {
+    font-family: var(--font-mono);
+    color: #e0e7ff;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.endpoint-card .description {
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* Buttons */
+.button-group {
+    margin: 16px 0;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+button.action-btn {
+    padding: 9px 16px;
+    font-size: 13px;
+    cursor: pointer;
+    background: rgba(79,70,229,0.15);
+    color: #a5b4fc;
+    border: 1px solid rgba(79,70,229,0.35);
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+}
+
+button.action-btn:hover {
+    background: rgba(79,70,229,0.3);
+    border-color: rgba(79,70,229,0.7);
+    color: #e0e7ff;
+}
+
+button.action-btn:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+button.action-btn.reset {
+    background: rgba(220,38,38,0.12);
+    color: #fca5a5;
+    border-color: rgba(220,38,38,0.3);
+}
+
+button.action-btn.reset:hover {
+    background: rgba(220,38,38,0.25);
+    border-color: rgba(220,38,38,0.6);
+    color: #fecaca;
+}
+
+button.action-btn.paused {
+    background: rgba(217,119,6,0.12);
+    color: #fcd34d;
+    border-color: rgba(217,119,6,0.3);
+}
+
+button.action-btn.paused:hover {
+    background: rgba(217,119,6,0.25);
+    border-color: rgba(217,119,6,0.6);
+}
+
+button.action-btn.small {
+    padding: 5px 11px;
+    font-size: 12px;
+}
+
+/* Output */
+#output {
+    background: #0D0C1A;
+    border: 1px solid rgba(129,140,248,0.15);
+    padding: 16px 20px;
+    border-radius: 10px;
+    white-space: pre-wrap;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: #a5b4fc;
+    min-height: 200px;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+/* Stats Cards */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin: 16px 0;
+}
+
+.stat-card {
+    background: #1A1830;
+    border: 1px solid rgba(129,140,248,0.15);
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.15s ease;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--color-primary), #818cf8);
+    opacity: 0.6;
+}
+
+.stat-card:hover {
+    border-color: rgba(129,140,248,0.4);
+}
+
+.stat-card-highlight {
+    background: linear-gradient(135deg, rgba(79,70,229,0.25) 0%, rgba(49,46,129,0.3) 100%);
+    border-color: rgba(129,140,248,0.35);
+}
+
+.stat-card-highlight::before {
+    opacity: 1;
+}
+
+.stat-card-highlight .stat-number {
+    color: #e0e7ff;
+    font-size: 32px;
+}
+
+.stat-card-highlight .stat-label {
+    color: rgba(165,180,252,0.85);
+}
+
+.stat-number {
+    font-size: 28px;
+    font-weight: 700;
+    color: #a5b4fc;
+}
+
+.stat-label {
+    color: #64748b;
+    margin-top: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+
+/* Chart */
+.chart-container {
+    background: #1A1830;
+    border: 1px solid rgba(129,140,248,0.15);
+    padding: 16px 20px;
+    border-radius: 12px;
+    margin: 16px 0;
+    height: 420px;
+}
+
+canvas { max-height: 360px; }
+
+/* Auto-refresh */
+.auto-refresh {
+    text-align: center;
+    color: #475569;
+    margin-top: 16px;
+    font-size: 13px;
+}
+
+.auto-refresh .icon {
+    display: inline-block;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Feature List */
+.feature-list {
+    list-style: none;
+    padding: 0;
+}
+
+.feature-list li {
+    padding: 8px 0;
+    padding-left: 24px;
+    position: relative;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+}
+
+.feature-list li:before {
+    content: "\2713";
+    position: absolute;
+    left: 0;
+    color: var(--color-secondary);
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* Stubs Tab */
+.stubs-header {
+    background: #1A1830;
+    border: 1px solid rgba(129,140,248,0.15);
+    padding: 12px 20px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.stubs-count {
+    font-size: 14px;
+    color: #c7d2fe;
+    font-weight: 600;
+}
+
+.search-box {
+    padding: 9px 12px;
+    background: #0F0E1A;
+    border: 1px solid rgba(129,140,248,0.2);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    color: #c7d2fe;
+    width: 280px;
+    transition: border-color var(--transition-fast);
+}
+
+.search-box::placeholder { color: #475569; }
+
+.search-box:focus {
+    outline: none;
+    border-color: rgba(79,70,229,0.6);
+    box-shadow: 0 0 0 3px rgba(79,70,229,0.12);
+}
+
+.stubs-grid {
+    display: grid;
+    gap: 8px;
+}
+
+.stub-card {
+    background: #1A1830;
+    border: 1px solid rgba(129,140,248,0.12);
+    padding: 12px 20px;
+    border-radius: 10px;
+    transition: border-color var(--transition-fast);
+}
+
+.stub-card:hover {
+    border-color: rgba(129,140,248,0.4);
+}
+
+.stub-card-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    align-items: center;
+}
+
+.stub-card-left { min-width: 0; }
+
+.stub-card-right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.stub-method {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 11px;
+    color: var(--color-white);
+    margin-right: 8px;
+    text-transform: uppercase;
+}
+
+.method-GET { background: rgba(8,145,178,0.2); color: #67e8f9; }
+.method-POST { background: rgba(79,70,229,0.2); color: #a5b4fc; }
+.method-PUT { background: rgba(217,119,6,0.2); color: #fcd34d; }
+.method-DELETE { background: rgba(220,38,38,0.2); color: #fca5a5; }
+.method-PATCH { background: rgba(124,58,237,0.2); color: #c4b5fd; }
+.method-ANY { background: rgba(100,116,139,0.2); color: #94a3b8; }
+
+.stub-url {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: #e0e7ff;
+    font-weight: 600;
+    word-break: break-all;
+    overflow-wrap: break-word;
+    max-width: 100%;
+}
+
+.stub-id {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: #475569;
+    margin-top: 4px;
+}
+
+.stub-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.stub-priority {
+    background: rgba(79,70,229,0.15);
+    color: #a5b4fc;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    border: 1px solid rgba(79,70,229,0.2);
+}
+
+.stub-details { margin-top: 12px; }
+
+.stub-detail-row {
+    display: flex;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.stub-detail-label {
+    font-weight: 600;
+    color: #64748b;
+    min-width: 120px;
+}
+
+.stub-detail-value {
+    color: var(--color-text-primary);
+    font-family: var(--font-mono);
+}
+
+.stub-response-status {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 11px;
+}
+
+.status-200 { background: rgba(22,163,74,0.15); color: #86efac; }
+.status-201 { background: rgba(22,163,74,0.15); color: #86efac; }
+.status-400 { background: rgba(217,119,6,0.15); color: #fcd34d; }
+.status-404 { background: rgba(217,119,6,0.15); color: #fcd34d; }
+.status-500 { background: rgba(220,38,38,0.15); color: #fca5a5; }
+
+.no-stubs {
+    background: #1A1830;
+    border: 1px solid rgba(129,140,248,0.12);
+    padding: 40px 20px;
+    border-radius: 12px;
+    text-align: center;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.loading {
+    background: #1A1830;
+    border: 1px solid rgba(129,140,248,0.12);
+    padding: 40px 20px;
+    border-radius: 12px;
+    text-align: center;
+    color: #818cf8;
+    font-size: 14px;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background: #1A1830;
+    margin: 3% auto;
+    padding: 0;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 900px;
+    max-height: 85vh;
+    overflow: hidden;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.7);
+    border: 1px solid rgba(129,140,248,0.2);
+}
+
+.modal-large { max-width: 1100px; }
+
+.modal-header {
+    background: linear-gradient(135deg, #1E1B4B, #312E81);
+    color: #e0e7ff;
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 1px solid rgba(129,140,248,0.2);
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.modal-tabs {
+    display: flex;
+    gap: 6px;
+    flex-grow: 1;
+    justify-content: center;
+}
+
+.modal-tab {
+    background: rgba(255,255,255,0.1);
+    color: #c7d2fe;
+    border: none;
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 13px;
+    transition: background var(--transition-fast);
+}
+
+.modal-tab:hover {
+    background: rgba(255,255,255,0.18);
+}
+
+.modal-tab.active {
+    background: rgba(79,70,229,0.5);
+    color: #fff;
+    font-weight: 600;
+}
+
+.close {
+    color: var(--color-white);
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+    opacity: 0.8;
+    transition: opacity var(--transition-fast);
+}
+
+.close:hover { opacity: 1; }
+
+.modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    max-height: calc(85vh - 140px);
+}
+
+.modal-footer {
+    padding: 12px 20px;
+    background: #131225;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    border-top: 1px solid rgba(129,140,248,0.12);
+}
+
+.editor-container {
+    border: 1px solid rgba(129,140,248,0.15);
+    border-radius: var(--radius-base);
+    overflow: hidden;
+}
+
+#stubEditor {
+    width: 100%;
+    min-height: 400px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 16px;
+    border: none;
+    outline: none;
+    resize: vertical;
+    background: #0D0C1A;
+    color: #a5b4fc;
+}
+
+.error-message {
+    background: rgba(220,38,38,0.1);
+    color: #fca5a5;
+    padding: 12px 16px;
+    border-radius: var(--radius-base);
+    margin-bottom: 16px;
+    border: 1px solid rgba(220,38,38,0.25);
+    border-left-width: 4px;
+    border-left-color: var(--color-error);
+    font-size: 14px;
+}
+
+.success-message {
+    background: rgba(22,163,74,0.1);
+    color: #86efac;
+    padding: 12px 16px;
+    border-radius: var(--radius-base);
+    margin-bottom: 16px;
+    border: 1px solid rgba(22,163,74,0.25);
+    border-left-width: 4px;
+    border-left-color: var(--color-success);
+    font-size: 14px;
+}
+
+.modal-editor { display: none; }
+.modal-editor.active { display: block; }
+
+/* Form Editor */
+.form-section {
+    background: #131225;
+    padding: 16px 20px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+    border: 1px solid rgba(129,140,248,0.12);
+}
+
+.form-section h3 {
+    margin: 0 0 12px 0;
+    color: #a5b4fc;
+    font-size: 15px;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(129,140,248,0.12);
+    padding-bottom: 8px;
+}
+
+.form-group label {
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #c7d2fe;
+    font-size: 13px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 9px 12px;
+    border: 1px solid rgba(129,140,248,0.2);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: var(--font-mono);
+    background: #0D0C1A;
+    color: #c7d2fe;
+    transition: border-color var(--transition-fast);
+    box-sizing: border-box;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder { color: #475569; }
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: rgba(79,70,229,0.6);
+    box-shadow: 0 0 0 3px rgba(79,70,229,0.12);
+}
+
+.inline-btn {
+    background: rgba(79,70,229,0.25);
+    color: #a5b4fc;
+    border: 1px solid rgba(79,70,229,0.35);
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    margin-left: 8px;
+    transition: background var(--transition-fast);
+}
+
+.inline-btn:hover {
+    background: rgba(79,70,229,0.4);
+    color: #e0e7ff;
+}
+
+.header-row, .param-row {
+    display: grid;
+    grid-template-columns: 1fr 2fr auto;
+    gap: 8px;
+    margin-bottom: 8px;
+    align-items: center;
+}
+
+.header-name, .header-value, .param-name, .param-value {
+    padding: 8px 10px;
+    border: 1px solid rgba(129,140,248,0.2);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-family: var(--font-mono);
+    background: #0D0C1A;
+    color: #c7d2fe;
+}
+
+.remove-btn {
+    background: rgba(220,38,38,0.15);
+    color: #fca5a5;
+    border: 1px solid rgba(220,38,38,0.25);
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1;
+    transition: background var(--transition-fast);
+}
+
+.remove-btn:hover {
+    background: rgba(220,38,38,0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    body { padding: 12px; }
+    .stubs-header { flex-direction: column; align-items: stretch; }
+    .search-box { width: 100%; }
+    .stub-card-header { grid-template-columns: 1fr; gap: 8px; }
+    .stub-card-right { justify-content: flex-start; }
+    .endpoints-grid { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .header { flex-direction: column; text-align: center; }
+    .button-group { justify-content: center; }
+}
+
+/* Unmatched Requests */
+.unmatched-toolbar {
+    background: #1A1830;
+    border: 1px solid rgba(129,140,248,0.15);
+    padding: 12px 20px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.unmatched-summary-banner {
+    background: rgba(220,38,38,0.08);
+    border: 1px solid rgba(220,38,38,0.2);
+    border-left: 4px solid var(--color-error);
+    border-radius: var(--radius-base);
+    padding: 14px 20px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.unmatched-summary-banner.empty {
+    background: rgba(22,163,74,0.06);
+    border-color: rgba(22,163,74,0.2);
+    border-left-color: var(--color-success);
+}
+
+.unmatched-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 90px;
+}
+
+.unmatched-stat-number {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--color-error);
+    line-height: 1.1;
+}
+
+.unmatched-stat-number.zero { color: var(--color-success); }
+
+.unmatched-stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    margin-top: 2px;
+    text-align: center;
+}
+
+.unmatched-hint {
+    flex: 1;
+    font-size: 13px;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+}
+
+.unmatched-card {
+    background: #1A1830;
+    border: 1px solid rgba(129,140,248,0.12);
+    border-left: 4px solid var(--color-error);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    transition: border-color var(--transition-fast);
+}
+
+.unmatched-card:hover {
+    border-color: rgba(220,38,38,0.5);
+}
+
+.unmatched-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    cursor: pointer;
+    user-select: none;
+    flex-wrap: wrap;
+}
+
+.unmatched-card-header:hover { background: rgba(129,140,248,0.05); }
+
+.unmatched-method {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    font-size: 11px;
+    color: var(--color-white);
+    text-transform: uppercase;
+    font-family: var(--font-mono);
+    flex-shrink: 0;
+    letter-spacing: .5px;
+}
+
+.unmatched-url {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: #e0e7ff;
+    flex: 1;
+    word-break: break-all;
+}
+
+.unmatched-time {
+    font-size: 11px;
+    color: #64748b;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.unmatched-expand-icon {
+    color: #64748b;
+    font-size: 11px;
+    flex-shrink: 0;
+    transition: transform var(--transition-fast);
+    width: 16px;
+    text-align: center;
+}
+
+.unmatched-card-detail {
+    display: none;
+    padding: 0 16px 16px;
+    border-top: 1px solid rgba(129,140,248,0.1);
+    background: #131225;
+}
+
+.unmatched-detail-section {
+    margin-top: 12px;
+}
+
+.unmatched-detail-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    margin-bottom: 6px;
+}
+
+.unmatched-headers-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-mono);
+    font-size: 12px;
+}
+
+.unmatched-headers-table tr {
+    border-bottom: 1px solid rgba(129,140,248,0.08);
+}
+
+.unmatched-headers-table tr:last-child { border-bottom: none; }
+
+.unmatched-headers-table td {
+    padding: 4px 8px;
+    vertical-align: top;
+}
+
+.unmatched-headers-table td:first-child {
+    font-weight: 600;
+    color: #818cf8;
+    white-space: nowrap;
+    width: 200px;
+    padding-right: 16px;
+}
+
+.unmatched-body-pre {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 320px;
+    overflow-y: auto;
+    background: #0D0C1A;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(129,140,248,0.12);
+    color: #a5b4fc;
+}
+
+.unmatched-empty {
+    background: #1A1830;
+    border: 1px solid rgba(129,140,248,0.12);
+    border-radius: 12px;
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.unmatched-empty-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+    opacity: .4;
+}
+
+.unmatched-empty-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-success);
+    margin-bottom: 6px;
+}
+
+.unmatched-empty-sub {
+    font-size: 13px;
+    color: #64748b;
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="header-logo" aria-label="WireMock">
+              <rect width="100" height="100" fill="#1E1B4B" rx="18"/>
+              <line x1="18" y1="25" x2="34" y2="68" stroke="#818CF8" stroke-width="5" stroke-linecap="round"/>
+              <line x1="34" y1="68" x2="50" y2="45" stroke="#818CF8" stroke-width="5" stroke-linecap="round"/>
+              <line x1="50" y1="45" x2="66" y2="68" stroke="#818CF8" stroke-width="5" stroke-linecap="round"/>
+              <line x1="66" y1="68" x2="82" y2="25" stroke="#818CF8" stroke-width="5" stroke-linecap="round"/>
+              <line x1="26" y1="46" x2="74" y2="46" stroke="#F97316" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 3"/>
+              <circle cx="18" cy="25" r="6" fill="#F97316"/>
+              <circle cx="34" cy="68" r="5" fill="#A5B4FC"/>
+              <circle cx="50" cy="45" r="6.5" fill="#F97316"/>
+              <circle cx="66" cy="68" r="5" fill="#A5B4FC"/>
+              <circle cx="82" cy="25" r="6" fill="#F97316"/>
+            </svg>
+            <div class="header-text">
+                <h1>WireMock Mock Dashboard</h1>
+                <div class="subtitle">Real-time WireMock Analytics & Monitoring</div>
+            </div>
+            <a href="/" class="header-home" title="Back to info page">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            </a>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('dashboard')">Dashboard</button>
+            <button class="tab" onclick="switchTab('mocks')">Mocks</button>
+            <button class="tab" onclick="switchTab('unmatched')" id="tabUnmatched">Unmatched</button>
+        </div>
+        
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="stats" id="stats"></div>
+            
+            <div class="chart-container">
+                <canvas id="stubChart"></canvas>
+            </div>
+            
+            <div class="button-group">
+                <button class="action-btn" onclick="getStubCounts()">Mock Counts</button>
+                <button class="action-btn" onclick="getUrlCounts()">URL Counts</button>
+                <button class="action-btn" onclick="getResponseTimes()">Response Times</button>
+                <button class="action-btn" onclick="getSummary()">Summary</button>
+                <button class="action-btn" id="pauseBtn" onclick="toggleAutoRefresh()">⏸️ Pause</button>
+                <button class="action-btn reset" onclick="resetCounters()">Reset Counters</button>
+            </div>
+
+            <div id="output">Click a button to load data...</div>
+            
+            <div class="auto-refresh">
+                <span class="icon">&#8635;</span> Auto-refreshing every 10 seconds (click Pause to stop)
+            </div>
+        </div>
+        
+        <!-- Mocks Tab -->
+        <div id="mocks" class="tab-content">
+            <div class="stubs-header">
+                <div class="stubs-count" id="stubsCount">Loading mocks...</div>
+                <input type="text" class="search-box" id="searchBox" placeholder="Search mocks by URL or method..." onkeyup="filterStubs()">
+                <button class="action-btn" onclick="addNewMock()">Add New Mock</button>
+                <button class="action-btn" onclick="exportMocks()">Export All</button>
+                <button class="action-btn" onclick="document.getElementById('importFile').click()">Import</button>
+                <button class="action-btn" onclick="document.getElementById('replaceFile').click()" style="background: #f59e0b; color: white;">Replace All</button>
+                <button class="action-btn" onclick="loadStubs()">Refresh Mocks</button>
+                <button class="action-btn reset" onclick="deleteAllMocks()">Delete All</button>
+                <input type="file" id="importFile" accept=".json" style="display:none" onchange="importMocks(event)">
+                <input type="file" id="replaceFile" accept=".json" style="display:none" onchange="replaceAllMocks(event)">
+            </div>
+            <div class="stubs-grid" id="stubsGrid">
+                <div class="loading">Loading mocks...</div>
+            </div>
+        </div>
+        
+        <!-- Unmatched Requests Tab -->
+        <div id="unmatched" class="tab-content">
+
+            <div class="unmatched-summary-banner" id="unmatchedBanner">
+                <div class="unmatched-stat">
+                    <div class="unmatched-stat-number" id="unmatchedTotalNum">—</div>
+                    <div class="unmatched-stat-label">Total since start</div>
+                </div>
+                <div class="unmatched-stat">
+                    <div class="unmatched-stat-number" id="unmatchedStoredNum">—</div>
+                    <div class="unmatched-stat-label">In buffer (max 200)</div>
+                </div>
+                <div class="unmatched-hint" id="unmatchedHint">
+                    Requests that reached WireMock but matched no stub are listed below.<br>
+                    Click a row to expand headers &amp; body — use <strong>Create Mock</strong> to turn the request into a stub.
+                </div>
+            </div>
+
+            <div class="unmatched-toolbar">
+                <span class="stubs-count" id="unmatchedCount" style="flex:1;">Loading...</span>
+                <input type="text" class="search-box" id="unmatchedSearch" placeholder="Filter by URL, method..." oninput="filterUnmatched()" style="width:260px;">
+                <button class="action-btn" onclick="loadUnmatched()">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:4px;"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                    Refresh
+                </button>
+                <button class="action-btn" id="groupToggleBtn" onclick="toggleGrouping()" title="Visa alla eller gruppera dubbletter">Show All</button>
+                <button class="action-btn reset" onclick="clearUnmatched()">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:4px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path></svg>
+                    Clear All
+                </button>
+            </div>
+
+            <div id="unmatchedList"></div>
+        </div>
+
+
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 id="modalTitle">Edit Mock</h2>
+                <div class="modal-tabs">
+                    <button class="modal-tab active" onclick="switchModalTab('form')">Form Editor</button>
+                    <button class="modal-tab" onclick="switchModalTab('json')">JSON Editor</button>
+                </div>
+                <span class="close" onclick="closeEditModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="modalMessage"></div>
+                
+                <!-- Form Editor -->
+                <div id="formEditor" class="modal-editor active">
+                    <div class="form-section">
+                        <h3>Request</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Method</label>
+                                <select id="mockMethod">
+                                    <option value="GET">GET</option>
+                                    <option value="POST">POST</option>
+                                    <option value="PUT">PUT</option>
+                                    <option value="DELETE">DELETE</option>
+                                    <option value="PATCH">PATCH</option>
+                                    <option value="ANY">ANY</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>URL Path</label>
+                                <input type="text" id="mockUrl" placeholder="/api/users">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>URL Pattern (optional - for regex matching)</label>
+                            <input type="text" id="mockUrlPattern" placeholder="/api/users/.*" style="font-family: monospace;">
+                            <small style="color: #666; margin-top: 5px; display: block;">Use .* for wildcards, e.g., /api/users/.* matches /api/users/123</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>
+                                Query Parameters (optional)
+                                <button type="button" class="inline-btn" onclick="addQueryParam()">+ Add Parameter</button>
+                            </label>
+                            <div id="queryParamsList"></div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" id="mockPersistent" style="width: 16px; height: 16px; cursor: pointer;">
+                                <span>Persistent</span>
+                            </label>
+                            <small style="color: #666; margin-top: 5px; display: block;">Persistent mocks survive WireMock restarts and resets. They are saved to the mappings directory on disk.</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Request Body Matching (optional)</label>
+                            <select id="bodyMatchType" onchange="updateBodyMatchFields()">
+                                <option value="none">No matching</option>
+                                <option value="contains">Contains text</option>
+                                <option value="equalTo">Exact match</option>
+                                <option value="matchesXPath">XPath match</option>
+                                <option value="equalToJson">JSON match</option>
+                            </select>
+                            <textarea id="bodyMatchValue" rows="3" style="display:none; margin-top: 10px;" placeholder="Enter match value..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3>Response</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Status Code</label>
+                                <select id="mockStatus">
+                                    <option value="200">200 OK</option>
+                                    <option value="201">201 Created</option>
+                                    <option value="204">204 No Content</option>
+                                    <option value="400">400 Bad Request</option>
+                                    <option value="401">401 Unauthorized</option>
+                                    <option value="403">403 Forbidden</option>
+                                    <option value="404">404 Not Found</option>
+                                    <option value="500">500 Internal Server Error</option>
+                                    <option value="502">502 Bad Gateway</option>
+                                    <option value="503">503 Service Unavailable</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Delay (milliseconds)</label>
+                                <input type="number" id="mockDelay" value="0" min="0" step="100">
+                            </div>
+                            <div class="form-group">
+                                <label>Priority (1-10)</label>
+                                <input type="number" id="mockPriority" value="5" min="1" max="10">
+                                <small style="color: #666; margin-top: 5px; display: block;">Lower = higher priority</small>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Response Body</label>
+                            <textarea id="mockResponseBody" rows="10" placeholder="Enter response content (JSON, XML, text, etc.)"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>
+                                Response Headers
+                                <button type="button" class="inline-btn" onclick="addResponseHeader()">+ Add Header</button>
+                            </label>
+                            <div id="responseHeadersList">
+                                <div class="header-row">
+                                    <input type="text" class="header-name" placeholder="Content-Type" value="Content-Type">
+                                    <input type="text" class="header-value" placeholder="application/json" value="application/json">
+                                    <button type="button" class="remove-btn" onclick="removeHeaderRow(this)" style="display:none;">×</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Body File (alternative to inline body)</label>
+                            <input type="text" id="mockBodyFile" placeholder="path/to/response-file.json">
+                            <small style="color: #666; margin-top: 5px; display: block;">File path relative to __files directory</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- JSON Editor -->
+                <div id="jsonEditor" class="modal-editor">
+                    <div class="editor-container">
+                        <textarea id="stubEditor"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn" onclick="closeEditModal()">Cancel</button>
+                <button class="action-btn" onclick="saveStub()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chartInstance = null;
+let autoRefreshInterval = null;
+let allStubs = [];
+let currentEditingStubId = null;
+let lastAction = 'getSummary'; // Track the last action for auto-refresh
+
+// RPS tracking
+let lastTotalRequests = null;
+let lastRequestTime = Date.now();
+let currentRPS = 0;
+
+function switchTab(tabName) {
+    // Update tab buttons
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(tab => tab.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    // Update tab content
+    const contents = document.querySelectorAll('.tab-content');
+    contents.forEach(content => content.classList.remove('active'));
+    document.getElementById(tabName).classList.add('active');
+    
+    // Manage auto-refresh and load data based on active tab
+    if (tabName === 'dashboard') {
+        startAutoRefresh();
+    } else {
+        stopAutoRefresh();
+    }
+    
+    if (tabName === 'mocks') {
+        loadStubs();
+    }
+    if (tabName === 'unmatched') {
+        loadUnmatched();
+    }
+}
+
+function switchTabByName(tabName) {
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(tab => {
+        const onclick = tab.getAttribute('onclick') || '';
+        if (onclick.includes(`'${tabName}'`)) tab.classList.add('active');
+        else tab.classList.remove('active');
+    });
+    const contents = document.querySelectorAll('.tab-content');
+    contents.forEach(content => content.classList.remove('active'));
+    document.getElementById(tabName).classList.add('active');
+    if (tabName === 'dashboard') startAutoRefresh(); else stopAutoRefresh();
+    if (tabName === 'mocks') loadStubs();
+    if (tabName === 'unmatched') loadUnmatched();
+}
+
+function startAutoRefresh() {
+    if (!autoRefreshInterval) {
+        autoRefreshInterval = setInterval(() => {
+            // Call the last action function
+            if (lastAction === 'getStubCounts') getStubCounts();
+            else if (lastAction === 'getUrlCounts') getUrlCounts();
+            else if (lastAction === 'getResponseTimes') getResponseTimes();
+            else getSummary();
+        }, 10000);
+    }
+}
+
+function stopAutoRefresh() {
+    if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+        autoRefreshInterval = null;
+    }
+}
+
+function toggleAutoRefresh() {
+    const btn = document.getElementById('pauseBtn');
+    if (autoRefreshInterval) {
+        // Currently running, pause it
+        stopAutoRefresh();
+        btn.innerHTML = '▶️ Resume';
+        btn.classList.add('paused');
+    } else {
+        // Currently paused, resume it
+        startAutoRefresh();
+        btn.innerHTML = '⏸️ Pause';
+        btn.classList.remove('paused');
+        // Immediately refresh to show current data
+        if (lastAction === 'getStubCounts') getStubCounts();
+        else if (lastAction === 'getUrlCounts') getUrlCounts();
+        else if (lastAction === 'getResponseTimes') getResponseTimes();
+        else getSummary();
+    }
+}
+
+// ---- Unmatched requests ----
+let allUnmatched = [];
+let unmatchedGrouped = true; // default: grouped view
+
+const METHOD_COLORS = {
+    GET:    'var(--color-secondary)',
+    POST:   'var(--color-primary)',
+    PUT:    'var(--color-warning)',
+    DELETE: 'var(--color-error)',
+    PATCH:  '#6F42C1',
+    HEAD:   'var(--color-gray-500)',
+    OPTIONS:'var(--color-gray-400)'
+};
+function methodColor(m) { return METHOD_COLORS[m] || 'var(--color-gray-500)'; }
+
+function formatTimestamp(ts) {
+    try {
+        const d = new Date(ts);
+        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+             + ' ' + d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    } catch(e) { return ts || ''; }
+}
+
+/** Group by method+url, keep most recent occurrence's headers/body. */
+function groupUnmatched(items) {
+    const map = new Map();
+    // items are newest-first; first encountered = most recent
+    items.forEach((r, originalIndex) => {
+        const key = r.method + ':' + r.url;
+        if (!map.has(key)) {
+            map.set(key, { ...r, count: 1, originalIndex, lastSeen: r.timestamp, firstSeen: r.timestamp });
+        } else {
+            const g = map.get(key);
+            g.count++;
+            g.firstSeen = r.timestamp; // iterating newest→oldest, so this stays oldest
+        }
+    });
+    return Array.from(map.values());
+}
+
+function toggleGrouping() {
+    unmatchedGrouped = !unmatchedGrouped;
+    const btn = document.getElementById('groupToggleBtn');
+    if (btn) btn.textContent = unmatchedGrouped ? 'Show All' : 'Group Duplicates';
+    applyFilterAndRender(document.getElementById('unmatchedSearch').value.toLowerCase());
+}
+
+async function loadUnmatched() {
+    const list = document.getElementById('unmatchedList');
+    list.innerHTML = '<div class="loading">Loading unmatched requests...</div>';
+    try {
+        const res = await fetch('/__admin/unmatched-requests');
+        const data = await res.json();
+        allUnmatched = data.requests || [];
+        updateUnmatchedBanner(data.total, data.stored);
+        document.getElementById('unmatchedSearch').value = '';
+        applyFilterAndRender('');
+    } catch (e) {
+        list.innerHTML = `<div class="no-stubs" style="color:var(--color-error);">Failed to load: ${escapeHtml(e.message)}</div>`;
+    }
+}
+
+function applyFilterAndRender(q) {
+    let items = allUnmatched;
+    if (q) {
+        items = items.filter(r =>
+            r.url.toLowerCase().includes(q) || r.method.toLowerCase().includes(q)
+        );
+    }
+    const toRender = unmatchedGrouped
+        ? groupUnmatched(items)
+        : items.map((r, i) => ({ ...r, count: 1, originalIndex: i }));
+    renderUnmatched(toRender);
+}
+
+function updateUnmatchedBanner(total, stored) {
+    const banner   = document.getElementById('unmatchedBanner');
+    const totalEl  = document.getElementById('unmatchedTotalNum');
+    const storedEl = document.getElementById('unmatchedStoredNum');
+    const countEl  = document.getElementById('unmatchedCount');
+    const hint     = document.getElementById('unmatchedHint');
+    if (totalEl)  totalEl.textContent  = (total  || 0).toLocaleString();
+    if (storedEl) storedEl.textContent = (stored || 0).toLocaleString();
+    if (countEl)  countEl.textContent  = `Showing ${stored || 0} entries (${(total || 0).toLocaleString()} total)`;
+    if (banner) {
+        const none = !total || total === 0;
+        banner.classList.toggle('empty', none);
+        if (totalEl)  totalEl.classList.toggle('zero', none);
+        if (storedEl) storedEl.classList.toggle('zero', none);
+        if (hint) hint.innerHTML = none
+            ? '<strong style="color:var(--color-success);">All good!</strong> No unmatched requests recorded since the last reset.'
+            : 'Requests that reached WireMock but matched no stub are listed below.<br>Click a row to expand headers &amp; body \u2014 use <strong>+ Create Mock</strong> to turn it into a stub.';
+    }
+}
+
+function renderUnmatched(items) {
+    const list = document.getElementById('unmatchedList');
+    if (!items || items.length === 0) {
+        list.innerHTML = `
+            <div class="unmatched-empty">
+                <div class="unmatched-empty-icon">&#10003;</div>
+                <div class="unmatched-empty-title">No unmatched requests</div>
+                <div class="unmatched-empty-sub">All requests matched a stub &mdash; or the buffer is empty.</div>
+            </div>`;
+        return;
+    }
+    list.innerHTML = items.map((r, i) => {
+        const detailId = 'ud-' + i;
+        const color    = methodColor(r.method);
+        const txtColor = r.method === 'PUT' ? 'color:#333;' : '';
+        const count    = r.count || 1;
+
+        const countBadge = count > 1
+            ? `<span title="${count} identiska anrop" style="background:var(--color-error);color:#fff;font-size:11px;font-weight:700;padding:2px 9px;border-radius:12px;flex-shrink:0;">&times;${count}</span>`
+            : '';
+
+        const timeLabel = count > 1
+            ? `<span class="unmatched-time">${formatTimestamp(r.lastSeen || r.timestamp)} &mdash; senast</span>`
+            : `<span class="unmatched-time">${formatTimestamp(r.timestamp)}</span>`;
+
+        const headersRows = r.headers && Object.keys(r.headers).length > 0
+            ? Object.entries(r.headers).map(([k, v]) =>
+                `<tr><td>${escapeHtml(k)}</td><td>${escapeHtml(v)}</td></tr>`).join('')
+            : '<tr><td colspan="2" style="color:var(--color-text-muted);font-style:italic;">No headers captured</td></tr>';
+
+        const bodySection = r.body ? `
+            <div class="unmatched-detail-section">
+                <div class="unmatched-detail-label">Request Body</div>
+                <pre class="unmatched-body-pre">${escapeHtml(r.body)}</pre>
+            </div>` : '';
+
+        const firstSeenNote = count > 1
+            ? `<div style="margin-top:8px;font-size:12px;color:var(--color-text-muted);">Sedd sedan: ${escapeHtml(r.firstSeen || '')}</div>`
+            : '';
+
+        const mockIdx = r.originalIndex !== undefined ? r.originalIndex : i;
+
+        return `
+        <div class="unmatched-card">
+            <div class="unmatched-card-header" onclick="toggleUnmatchedDetail('${detailId}')" role="button" aria-expanded="false" aria-controls="${detailId}">
+                <span class="unmatched-method" style="background:${color};${txtColor}">${escapeHtml(r.method)}</span>
+                ${countBadge}
+                <span class="unmatched-url">${escapeHtml(r.url)}</span>
+                ${timeLabel}
+                <button class="action-btn small" style="background:var(--color-primary);flex-shrink:0;"
+                    onclick="event.stopPropagation();createMockFromUnmatched(${mockIdx})"
+                    title="Skapa stub från detta anrop">+ Create Mock</button>
+                <span class="unmatched-expand-icon" id="${detailId}-arrow">&#9660;</span>
+            </div>
+            <div id="${detailId}" class="unmatched-card-detail">
+                <div class="unmatched-detail-section">
+                    <div class="unmatched-detail-label">Request Headers${count > 1 ? ' <span style="font-weight:400;font-style:italic;">(senaste anropet)</span>' : ''}</div>
+                    <table class="unmatched-headers-table">${headersRows}</table>
+                </div>
+                ${bodySection}
+                ${firstSeenNote}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function toggleUnmatchedDetail(id) {
+    const el     = document.getElementById(id);
+    const arrow  = document.getElementById(id + '-arrow');
+    const header = el && el.previousElementSibling;
+    if (!el) return;
+    const open = el.style.display !== 'block';
+    el.style.display = open ? 'block' : 'none';
+    if (arrow)  arrow.innerHTML = open ? '&#9650;' : '&#9660;';
+    if (header) header.setAttribute('aria-expanded', String(open));
+}
+
+function createMockFromUnmatched(index) {
+    const r = allUnmatched[index];
+    if (!r) return;
+
+    // Parse URL into path + query params
+    const qIdx = r.url.indexOf('?');
+    const path = qIdx >= 0 ? r.url.substring(0, qIdx) : r.url;
+    const queryString = qIdx >= 0 ? r.url.substring(qIdx + 1) : '';
+
+    const newMock = {
+        request: {
+            method: r.method,
+            url: path
+        },
+        response: {
+            status: 200,
+            body: '{"message": "ok"}',
+            headers: { 'Content-Type': 'application/json' }
+        }
+    };
+
+    // Add query params as matchers if present
+    if (queryString) {
+        const qp = {};
+        queryString.split('&').forEach(pair => {
+            const [k, v] = pair.split('=').map(decodeURIComponent);
+            if (k) qp[k] = { equalTo: v || '' };
+        });
+        if (Object.keys(qp).length) newMock.request.queryParameters = qp;
+    }
+
+    document.getElementById('modalTitle').textContent = 'Create Mock from Unmatched Request';
+    document.getElementById('stubEditor').value = JSON.stringify(newMock, null, 2);
+    document.getElementById('stubEditor').readOnly = false;
+    document.getElementById('modalMessage').innerHTML = '';
+
+    populateFormFromMock(newMock);
+
+    // Switch to form tab
+    document.querySelectorAll('.modal-tab').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.modal-tab')[0].classList.add('active');
+    document.querySelectorAll('.modal-editor').forEach(editor => editor.classList.remove('active'));
+    document.getElementById('formEditor').classList.add('active');
+
+    const modal = document.getElementById('editModal');
+    modal.querySelector('.modal-footer').style.display = 'flex';
+    modal.style.display = 'block';
+
+    currentEditingStubId = null;
+}
+
+function filterUnmatched() {
+    const q = document.getElementById('unmatchedSearch').value.toLowerCase();
+    applyFilterAndRender(q);
+}
+
+async function clearUnmatched() {
+    if (!confirm('Clear all recorded unmatched requests?')) return;
+    await fetch('/__admin/unmatched-requests', { method: 'DELETE' });
+    allUnmatched = [];
+    updateUnmatchedBanner(0, 0);
+    applyFilterAndRender('');
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+// ---- End unmatched requests ----
+
+async function loadStubs() {
+    const stubsGrid = document.getElementById('stubsGrid');
+    const stubsCount = document.getElementById('stubsCount');
+    
+    stubsGrid.innerHTML = '<div class="loading">Loading mocks...</div>';
+    
+    try {
+        const response = await fetch('/__admin/mappings');
+        const data = await response.json();
+        allStubs = data.mappings || [];
+        
+        stubsCount.textContent = `Total Stubs: ${allStubs.length}`;
+        
+        if (allStubs.length === 0) {
+            stubsGrid.innerHTML = '<div class="no-stubs">No stubs found. Upload some stub mappings to WireMock.</div>';
+            return;
+        }
+        
+        displayStubs(allStubs);
+    } catch (error) {
+        stubsGrid.innerHTML = `<div class="no-stubs">Error loading mocks: ${error.message}</div>`;
+    }
+}
+
+function displayStubs(stubs) {
+    const stubsGrid = document.getElementById('stubsGrid');
+    
+    if (stubs.length === 0) {
+        stubsGrid.innerHTML = '<div class="no-stubs">No stubs match your search.</div>';
+        return;
+    }
+    
+    let html = '';
+    
+    stubs.forEach(stub => {
+        const request = stub.request || {};
+        const response = stub.response || {};
+        const method = request.method || 'ANY';
+        const url = request.url || request.urlPattern || request.urlPath || request.urlPathPattern || 'N/A';
+        const priority = stub.priority || 5;
+        const id = stub.id || stub.uuid || 'N/A';
+        const status = response.status || 200;
+        const isPersistent = stub.persistent === true;
+        
+        let statusClass = 'status-200';
+        if (status >= 400 && status < 500) statusClass = 'status-400';
+        if (status >= 500) statusClass = 'status-500';
+        
+        const persistentBadge = isPersistent ? '<span style="background: #7AB800; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">PERSISTENT</span>' : '';
+        
+        html += `
+            <div class="stub-card">
+                <div class="stub-card-header">
+                    <div class="stub-card-left">
+                        <div>
+                            <span class="stub-method method-${method}">${method}</span>
+                            <span class="stub-url">${url}</span>
+                            ${persistentBadge}
+                        </div>
+                        <div class="stub-id">ID: ${id}</div>
+                    </div>
+                    <div class="stub-card-right">
+                        <span class="stub-priority">Priority: ${priority}</span>
+                        <span class="stub-response-status ${statusClass}">${status}</span>
+                        <div class="stub-actions">
+                            <button class="action-btn small" onclick="viewStub('${id}')">View</button>
+                            <button class="action-btn small" onclick="editStub('${id}')">Edit</button>
+                            <button class="action-btn small reset" onclick="deleteStub('${id}')">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    stubsGrid.innerHTML = html;
+}
+
+function filterStubs() {
+    const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+    
+    if (searchTerm === '') {
+        displayStubs(allStubs);
+        return;
+    }
+    
+    const filtered = allStubs.filter(stub => {
+        const request = stub.request || {};
+        const method = (request.method || 'ANY').toLowerCase();
+        const url = (request.url || request.urlPattern || request.urlPath || request.urlPathPattern || '').toLowerCase();
+        const id = (stub.id || stub.uuid || '').toLowerCase();
+        
+        return method.includes(searchTerm) || url.includes(searchTerm) || id.includes(searchTerm);
+    });
+    
+    displayStubs(filtered);
+}
+
+async function viewStub(stubId) {
+    try {
+        const response = await fetch(`/__admin/mappings/${stubId}`);
+        const stub = await response.json();
+        
+        document.getElementById('modalTitle').textContent = 'View Mock (Read-Only)';
+        document.getElementById('stubEditor').value = JSON.stringify(stub, null, 2);
+        document.getElementById('stubEditor').readOnly = true;
+        document.getElementById('modalMessage').innerHTML = '';
+        
+        // Populate form
+        populateFormFromMock(stub);
+        
+        // Disable form fields in view mode
+        document.querySelectorAll('#formEditor input, #formEditor select, #formEditor textarea').forEach(field => {
+            field.disabled = true;
+        });
+        
+        // Show JSON tab by default for view mode
+        document.querySelectorAll('.modal-tab').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.modal-tab')[1].classList.add('active');
+        document.querySelectorAll('.modal-editor').forEach(editor => editor.classList.remove('active'));
+        document.getElementById('jsonEditor').classList.add('active');
+        
+        const modal = document.getElementById('editModal');
+        modal.querySelector('.modal-footer').style.display = 'none';
+        modal.style.display = 'block';
+        
+        currentEditingStubId = null;
+    } catch (error) {
+        alert('Error loading mock: ' + error.message);
+    }
+}
+
+async function editStub(stubId) {
+    try {
+        const response = await fetch(`/__admin/mappings/${stubId}`);
+        const stub = await response.json();
+        
+        document.getElementById('modalTitle').textContent = 'Edit Mock';
+        document.getElementById('stubEditor').value = JSON.stringify(stub, null, 2);
+        document.getElementById('stubEditor').readOnly = false;
+        document.getElementById('modalMessage').innerHTML = '';
+        
+        // Populate form
+        populateFormFromMock(stub);
+        
+        // Enable form fields
+        document.querySelectorAll('#formEditor input, #formEditor select, #formEditor textarea').forEach(field => {
+            field.disabled = false;
+        });
+        
+        // Show form tab by default
+        document.querySelectorAll('.modal-tab').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.modal-tab')[0].classList.add('active');
+        document.querySelectorAll('.modal-editor').forEach(editor => editor.classList.remove('active'));
+        document.getElementById('formEditor').classList.add('active');
+        
+        const modal = document.getElementById('editModal');
+        modal.querySelector('.modal-footer').style.display = 'flex';
+        modal.style.display = 'block';
+        
+        currentEditingStubId = stubId;
+    } catch (error) {
+        alert('Error loading mock: ' + error.message);
+    }
+}
+
+async function saveStub() {
+    const messageDiv = document.getElementById('modalMessage');
+    
+    try {
+        // If form editor is active, sync form to JSON first
+        if (document.getElementById('formEditor').classList.contains('active')) {
+            syncFormToJson();
+        }
+        
+        const stubJson = document.getElementById('stubEditor').value;
+        const stub = JSON.parse(stubJson);
+        
+        let response;
+        if (currentEditingStubId) {
+            // Update existing mock
+            response = await fetch(`/__admin/mappings/${currentEditingStubId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(stub)
+            });
+            messageDiv.innerHTML = '<div class="success-message">Mock updated successfully!</div>';
+        } else {
+            // Create new mock
+            response = await fetch('/__admin/mappings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(stub)
+            });
+            messageDiv.innerHTML = '<div class="success-message">Mock created successfully!</div>';
+        }
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        setTimeout(() => {
+            closeEditModal();
+            loadStubs();
+        }, 1500);
+        
+    } catch (error) {
+        messageDiv.innerHTML = `<div class="error-message">Error saving mock: ${error.message}</div>`;
+    }
+}
+
+async function exportMocks() {
+    try {
+        const response = await fetch('/__admin/mappings');
+        const data = await response.json();
+        
+        // Create export object with metadata
+        const exportData = {
+            exportDate: new Date().toISOString(),
+            wiremockVersion: "3.x",
+            mockCount: data.mappings ? data.mappings.length : 0,
+            mappings: data.mappings || []
+        };
+        
+        // Create download
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `wiremock-mocks-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        alert(`Exported ${exportData.mockCount} mocks successfully!`);
+    } catch (error) {
+        alert('Error exporting mocks: ' + error.message);
+    }
+}
+
+async function importMocks(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        
+        // Support both our export format and raw WireMock format
+        const mappings = data.mappings || (Array.isArray(data) ? data : [data]);
+        
+        if (mappings.length === 0) {
+            alert('No mocks found in file');
+            return;
+        }
+        
+        // Confirm import
+        if (!confirm(`Import ${mappings.length} mocks? This will add them to existing mocks.`)) {
+            event.target.value = ''; // Reset file input
+            return;
+        }
+        
+        let successCount = 0;
+        let errorCount = 0;
+        
+        // Import using WireMock's import API with OVERWRITE to avoid duplicates
+        // Existing stubs (matched by id) are updated; new stubs are added; old stubs are kept
+        const response = await fetch('/__admin/mappings/import', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                mappings: mappings,
+                importOptions: {
+                    duplicatePolicy: "OVERWRITE",
+                    deleteAllNotInImport: false
+                }
+            })
+        });
+        
+        if (response.ok) {
+            successCount = mappings.length;
+        } else {
+            errorCount = mappings.length;
+            console.error('Failed to import mocks:', await response.text());
+        }
+        
+        // Show results
+        let message = `Import complete!\n✓ Success: ${successCount}\n`;
+        if (errorCount > 0) {
+            message += `✗ Failed: ${errorCount}`;
+        }
+        alert(message);
+        
+        // Refresh the mocks list
+        loadStubs();
+        
+    } catch (error) {
+        alert('Error reading file: ' + error.message);
+    } finally {
+        event.target.value = ''; // Reset file input
+    }
+}
+
+async function replaceAllMocks(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        
+        // Support both our export format and raw WireMock format
+        const mappings = data.mappings || (Array.isArray(data) ? data : [data]);
+        
+        if (mappings.length === 0) {
+            alert('No mocks found in file');
+            return;
+        }
+        
+        // Confirm replacement
+        if (!confirm(`⚠️ REPLACE ALL MOCKS?\n\nThis will:\n1. Delete ALL existing mocks\n2. Import ${mappings.length} new mocks\n\nThis action cannot be undone!`)) {
+            event.target.value = '';
+            return;
+        }
+        
+        // Use WireMock's import API with deleteAllNotInImport option
+        const response = await fetch('/__admin/mappings/import', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                mappings: mappings,
+                importOptions: {
+                    duplicatePolicy: "OVERWRITE",
+                    deleteAllNotInImport: true
+                }
+            })
+        });
+        
+        if (response.ok) {
+            alert(`✓ Successfully replaced all mocks!\n\n${mappings.length} mocks imported.`);
+            loadStubs();
+        } else {
+            const errorText = await response.text();
+            throw new Error(`Import failed: ${errorText}`);
+        }
+        
+    } catch (error) {
+        alert('Error replacing mocks: ' + error.message);
+    } finally {
+        event.target.value = ''; // Reset file input
+    }
+}
+
+async function deleteAllMocks() {
+    if (!confirm('⚠️ WARNING: Delete ALL mocks?\n\nThis will permanently remove all mock configurations.\n\nConsider exporting first!')) {
+        return;
+    }
+    
+    // Double confirmation for safety
+    if (!confirm('Are you ABSOLUTELY sure? This cannot be undone!')) {
+        return;
+    }
+    
+    try {
+        // Get all mocks
+        const response = await fetch('/__admin/mappings');
+        const data = await response.json();
+        const mappings = data.mappings || [];
+        
+        if (mappings.length === 0) {
+            alert('No mocks to delete');
+            return;
+        }
+        
+        let successCount = 0;
+        let errorCount = 0;
+        
+        // Delete each mock
+        for (const mapping of mappings) {
+            try {
+                const stubId = mapping.id || mapping.uuid;
+                const deleteResponse = await fetch(`/__admin/mappings/${stubId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (deleteResponse.ok) {
+                    successCount++;
+                } else {
+                    errorCount++;
+                }
+            } catch (error) {
+                errorCount++;
+                console.error('Error deleting mock:', error);
+            }
+        }
+        
+        alert(`Deleted ${successCount} mocks successfully!` + (errorCount > 0 ? `\n${errorCount} failed` : ''));
+        loadStubs();
+        
+    } catch (error) {
+        alert('Error deleting mocks: ' + error.message);
+    }
+}
+
+async function deleteStub(stubId) {
+    if (!confirm('Are you sure you want to delete this mock? This action cannot be undone.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/__admin/mappings/${stubId}`, {
+            method: 'DELETE'
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        alert('Mock deleted successfully!');
+        loadStubs();
+    } catch (error) {
+        alert('Error deleting mock: ' + error.message);
+    }
+}
+
+async function addNewMock() {
+    const newMock = {
+        "request": { "method": "GET", "url": "/api/example" },
+        "response": { "status": 200, "body": "Example response", "headers": { "Content-Type": "application/json" } }
+    };
+    
+    document.getElementById('modalTitle').textContent = 'Add New Mock';
+    document.getElementById('stubEditor').value = JSON.stringify(newMock, null, 2);
+    document.getElementById('stubEditor').readOnly = false;
+    document.getElementById('modalMessage').innerHTML = '';
+    
+    // Populate form
+    populateFormFromMock(newMock);
+    
+    // Show form tab by default
+    document.querySelectorAll('.modal-tab').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.modal-tab')[0].classList.add('active');
+    document.querySelectorAll('.modal-editor').forEach(editor => editor.classList.remove('active'));
+    document.getElementById('formEditor').classList.add('active');
+    
+    const modal = document.getElementById('editModal');
+    modal.querySelector('.modal-footer').style.display = 'flex';
+    modal.style.display = 'block';
+    
+    currentEditingStubId = null;
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').style.display = 'none';
+    currentEditingStubId = null;
+}
+
+const CHART_MAX_BARS = 30; // max bars before collapsing remainder into "Others"
+
+function trimChartData(data) {
+    const stubData = data.counts || {};
+    // Sort by count descending
+    const sorted = Object.entries(stubData).sort((a, b) => b[1] - a[1]);
+    const total = sorted.reduce((s, [, v]) => s + v, 0);
+
+    if (sorted.length <= CHART_MAX_BARS) {
+        return { labels: sorted.map(([k]) => k), values: sorted.map(([, v]) => v), total, trimmed: false, hidden: 0 };
+    }
+
+    const top = sorted.slice(0, CHART_MAX_BARS);
+    const othersCount = sorted.slice(CHART_MAX_BARS).reduce((s, [, v]) => s + v, 0);
+    const othersKeys  = sorted.length - CHART_MAX_BARS;
+    top.push([`Others (${othersKeys} more patterns)`, othersCount]);
+
+    return {
+        labels: top.map(([k]) => k),
+        values: top.map(([, v]) => v),
+        total,
+        trimmed: true,
+        hidden: othersKeys
+    };
+}
+
+function createStackedBarChart(data) {
+    const ctx = document.getElementById('stubChart').getContext('2d');
+    
+    if (chartInstance) {
+        chartInstance.destroy();
+    }
+
+    const { labels, values, total, trimmed, hidden } = trimChartData(data);
+
+    const titleText = trimmed
+        ? `Top ${CHART_MAX_BARS} Patterns by Count  (${hidden} more patterns hidden)`
+        : 'Request Distribution by Stub Pattern (Sorted by Count)';
+
+    // Last bar is "Others" — give it a neutral colour
+    const colors = generateColors(labels.length);
+    if (trimmed) colors[colors.length - 1] = 'hsla(0, 0%, 60%, 0.7)';
+    
+    chartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Request Count',
+                data: values,
+                backgroundColor: colors,
+                borderColor: colors.map(c => c.replace('0.7', '1')),
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: titleText,
+                    font: { size: 16, weight: 'bold' },
+                    padding: 16
+                },
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const count = context.parsed.y;
+                            const percentage = ((count / total) * 100).toFixed(2);
+                            return `Count: ${count.toLocaleString()} (${percentage}%)`;
+                        }
+                    },
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    titleFont: { size: 13, weight: 'bold' },
+                    bodyFont: { size: 13 }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) { return value.toLocaleString(); },
+                        font: { size: 12 }
+                    },
+                    grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                },
+                x: {
+                    ticks: {
+                        autoSkip: false,
+                        maxRotation: 45,
+                        minRotation: 45,
+                        font: { size: 11 },
+                        callback: function(value, index) {
+                            const label = this.getLabelForValue(index);
+                            return label.length > 50 ? label.substring(0, 48) + '…' : label;
+                        }
+                    },
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+}
+
+function generateColors(count) {
+    const colors = [];
+    for (let i = 0; i < count; i++) {
+        const hue = (i * 360 / count) % 360;
+        colors.push(`hsla(${hue}, 70%, 60%, 0.7)`);
+    }
+    return colors;
+}
+
+async function getStubCounts() {
+    lastAction = 'getStubCounts';
+    try {
+        const response = await fetch('/__admin/stub-counter');
+        const data = await response.json();
+        document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+        try { createStackedBarChart(data); } catch (chartError) { console.warn('Chart rendering failed:', chartError.message); }
+        updateStats(data.total, Object.keys(data.counts || {}).length, null);
+    } catch (error) {
+        document.getElementById('output').textContent = 'Error: ' + error.message;
+    }
+}
+
+async function getUrlCounts() {
+    lastAction = 'getUrlCounts';
+    try {
+        const response = await fetch('/__admin/stub-counter/urls');
+        const data = await response.json();
+        document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+        try { createStackedBarChart(data); } catch (chartError) { console.warn('Chart rendering failed:', chartError.message); }
+        updateStats(data.total, null, Object.keys(data.counts || {}).length);
+    } catch (error) {
+        document.getElementById('output').textContent = 'Error: ' + error.message;
+    }
+}
+
+async function getSummary() {
+    lastAction = 'getSummary';
+    try {
+        // Get JSON data for chart
+        const jsonResponse = await fetch('/__admin/stub-counter');
+        const jsonData = await jsonResponse.json();
+        
+        // Get text summary for display
+        const textResponse = await fetch('/__admin/stub-counter/summary');
+        const textData = await textResponse.text();
+        
+        document.getElementById('output').textContent = textData;
+        try {
+            createStackedBarChart(jsonData);
+        } catch (chartError) {
+            console.warn('Chart rendering failed (Chart.js may not be loaded):', chartError.message);
+        }
+        updateStats(jsonData.total, Object.keys(jsonData.counts || {}).length, null);
+    } catch (error) {
+        document.getElementById('output').textContent = 'Error: ' + error.message;
+    }
+}
+
+async function getResponseTimes() {
+    lastAction = 'getResponseTimes';
+    try {
+        const response = await fetch('/__admin/response-times');
+        const data = await response.json();
+
+        const patterns = data.patterns || {};
+        const keys = Object.keys(patterns);
+        if (keys.length === 0) {
+            document.getElementById('output').textContent = 'No response time data yet. Send some requests first.';
+            return;
+        }
+
+        const lines = [];
+        lines.push('Response Times (ms)');
+        lines.push('='.repeat(100));
+        lines.push(
+            'Stub Pattern'.padEnd(60) +
+            'Count'.padStart(8) +
+            'Last'.padStart(8) +
+            'Min'.padStart(8) +
+            'Avg'.padStart(8) +
+            'Max'.padStart(8)
+        );
+        lines.push('-'.repeat(100));
+        for (const key of keys) {
+            const s = patterns[key];
+            lines.push(
+                (key.length > 58 ? key.substring(0, 55) + '...' : key).padEnd(60) +
+                String(s.count).padStart(8) +
+                String(s.last != null ? s.last : '-').padStart(8) +
+                String(s.min).padStart(8) +
+                String(s.avg).padStart(8) +
+                String(s.max).padStart(8)
+            );
+        }
+
+        document.getElementById('output').textContent = lines.join('\n');
+
+        let totalSum = 0, totalCount = 0;
+        for (const s of Object.values(patterns)) {
+            totalSum += s.total;
+            totalCount += s.count;
+        }
+        const globalAvg = totalCount > 0 ? Math.round(totalSum / totalCount) : 0;
+        updateStats(totalCount, keys.length, null, globalAvg);
+    } catch (error) {
+        document.getElementById('output').textContent = 'Error: ' + error.message;
+    }
+}
+
+function updateStats(totalRequests, totalStubs, totalUrls, avgResponseTime) {
+    const statsDiv = document.getElementById('stats');
+    
+    // Calculate RPS
+    const currentTime = Date.now();
+    const timeDiff = (currentTime - lastRequestTime) / 1000; // seconds
+    
+    if (totalRequests !== null && lastTotalRequests !== null && timeDiff > 0) {
+        const requestDiff = totalRequests - lastTotalRequests;
+        currentRPS = Math.max(0, Math.round(requestDiff / timeDiff));
+    }
+    
+    // Update tracking variables
+    if (totalRequests !== null) {
+        lastTotalRequests = totalRequests;
+        lastRequestTime = currentTime;
+    }
+    
+    let html = '';
+    
+    if (totalRequests !== null) {
+        html += `
+            <div class="stat-card">
+                <div class="stat-number">${totalRequests.toLocaleString()}</div>
+                <div class="stat-label">Total Requests</div>
+            </div>
+        `;
+    }
+    
+    // RPS Card
+    if (totalRequests !== null) {
+        html += `
+            <div class="stat-card stat-card-highlight">
+                <div class="stat-number">${currentRPS}</div>
+                <div class="stat-label">Requests/Second</div>
+            </div>
+        `;
+    }
+    
+    if (totalStubs !== null) {
+        html += `
+            <div class="stat-card">
+                <div class="stat-number">${totalStubs}</div>
+                <div class="stat-label">Mock Patterns</div>
+            </div>
+        `;
+    }
+    
+    if (totalUrls !== null) {
+        html += `
+            <div class="stat-card">
+                <div class="stat-number">${totalUrls}</div>
+                <div class="stat-label">Unique URLs</div>
+            </div>
+        `;
+    }
+    
+    if (avgResponseTime !== undefined && avgResponseTime !== null) {
+        html += `
+            <div class="stat-card stat-card-highlight">
+                <div class="stat-number">${avgResponseTime} ms</div>
+                <div class="stat-label">Avg Response Time</div>
+            </div>
+        `;
+    }
+    
+    // Placeholder cards for async data
+    html += `
+        <div class="stat-card" id="stat-avg-rt-card" style="display:none">
+            <div class="stat-number" id="stat-avg-rt">—</div>
+            <div class="stat-label">Avg Response Time</div>
+        </div>
+        <div class="stat-card" id="stat-cpu-card" style="display:none">
+            <div class="stat-number" id="stat-cpu">—</div>
+            <div class="stat-label">CPU Usage</div>
+        </div>
+        <div class="stat-card" id="stat-unmatched-card" style="display:none;cursor:pointer;" onclick="switchTabByName('unmatched')" title="Click to view unmatched requests">
+            <div class="stat-number" id="stat-unmatched" style="color:var(--color-error);">—</div>
+            <div class="stat-label">Unmatched Requests</div>
+        </div>
+    `;
+    
+    statsDiv.innerHTML = html;
+    
+    // Fetch avg response time (if not already shown from Response Times button)
+    if (avgResponseTime === undefined || avgResponseTime === null) {
+        fetch('/__admin/response-times')
+            .then(r => r.json())
+            .then(data => {
+                const patterns = data.patterns || {};
+                let sum = 0, count = 0;
+                for (const s of Object.values(patterns)) {
+                    sum += s.total || 0;
+                    count += s.count || 0;
+                }
+                if (count > 0) {
+                    const card = document.getElementById('stat-avg-rt-card');
+                    const val = document.getElementById('stat-avg-rt');
+                    if (card && val) {
+                        val.textContent = Math.round(sum / count) + ' ms';
+                        card.style.display = '';
+                    }
+                }
+            })
+            .catch(() => {});
+    }
+    
+    // Fetch CPU usage
+    fetch('/__admin/server-metrics')
+        .then(r => r.json())
+        .then(data => {
+            const cpu = data.cpu;
+            if (cpu && cpu.processCpuPercent >= 0) {
+                const card = document.getElementById('stat-cpu-card');
+                const val = document.getElementById('stat-cpu');
+                if (card && val) {
+                    val.textContent = cpu.processCpuPercent + '%';
+                    card.style.display = '';
+                }
+            }
+        })
+        .catch(() => {});
+
+    // Fetch unmatched count
+    fetch('/__admin/unmatched-requests')
+        .then(r => r.json())
+        .then(data => {
+            const total = data.total || 0;
+            const card = document.getElementById('stat-unmatched-card');
+            const val = document.getElementById('stat-unmatched');
+            if (card && val) {
+                val.textContent = total.toLocaleString();
+                card.style.display = '';
+                // Highlight tab if there are unmatched requests
+                const tab = document.getElementById('tabUnmatched');
+                if (tab) {
+                    tab.style.color = total > 0 ? 'var(--color-error)' : '';
+                    tab.textContent = total > 0 ? `Unmatched (${total})` : 'Unmatched';
+                }
+            }
+        })
+        .catch(() => {});
+}
+
+async function resetCounters() {
+    if (!confirm('Are you sure you want to reset all counters? This will clear all tracking data.')) {
+        return;
+    }
+    try {
+        const response = await fetch('/__admin/reset-stub-counter', {
+            method: 'POST'
+        });
+        const data = await response.json();
+        document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+        document.getElementById('stats').innerHTML = '';
+        if (chartInstance) {
+            chartInstance.destroy();
+            chartInstance = null;
+        }
+        alert('Counters reset successfully!');
+    } catch (error) {
+        document.getElementById('output').textContent = 'Error: ' + error.message;
+        alert('Failed to reset counters: ' + error.message);
+    }
+}
+
+async function refreshChart() {
+    await getSummary();
+}
+
+function switchModalTab(tabName) {
+    const tabs = document.querySelectorAll('.modal-tab');
+    tabs.forEach(tab => tab.classList.remove('active'));
+    event.target.classList.add('active');
+    const editors = document.querySelectorAll('.modal-editor');
+    editors.forEach(editor => editor.classList.remove('active'));
+    if (tabName === 'form') {
+        document.getElementById('formEditor').classList.add('active');
+        syncJsonToForm();
+    } else {
+        document.getElementById('jsonEditor').classList.add('active');
+        syncFormToJson();
+    }
+}
+
+function syncFormToJson() {
+    try {
+        const mock = buildMockFromForm();
+        document.getElementById('stubEditor').value = JSON.stringify(mock, null, 2);
+    } catch (error) {
+        console.error('Error syncing:', error);
+    }
+}
+
+function syncJsonToForm() {
+    try {
+        const json = document.getElementById('stubEditor').value;
+        if (!json) return;
+        const mock = JSON.parse(json);
+        populateFormFromMock(mock);
+    } catch (error) {
+        console.error('Error syncing:', error);
+    }
+}
+
+function addQueryParam() {
+    const container = document.getElementById('queryParamsList');
+    const row = document.createElement('div');
+    row.className = 'param-row';
+    row.innerHTML = `
+        <input type="text" class="param-name" placeholder="paramName">
+        <input type="text" class="param-value" placeholder="value">
+        <button type="button" class="remove-btn" onclick="removeParamRow(this)">×</button>
+    `;
+    container.appendChild(row);
+}
+
+function removeParamRow(btn) {
+    btn.parentElement.remove();
+}
+
+function addResponseHeader() {
+    const container = document.getElementById('responseHeadersList');
+    const row = document.createElement('div');
+    row.className = 'header-row';
+    row.innerHTML = `
+        <input type="text" class="header-name" placeholder="Header-Name">
+        <input type="text" class="header-value" placeholder="value">
+        <button type="button" class="remove-btn" onclick="removeHeaderRow(this)">×</button>
+    `;
+    container.appendChild(row);
+    updateRemoveButtons();
+}
+
+function removeHeaderRow(btn) {
+    btn.parentElement.remove();
+    updateRemoveButtons();
+}
+
+function updateRemoveButtons() {
+    const headers = document.querySelectorAll('#responseHeadersList .header-row');
+    headers.forEach((row, index) => {
+        const removeBtn = row.querySelector('.remove-btn');
+        removeBtn.style.display = headers.length > 1 ? 'block' : 'none';
+    });
+}
+
+function updateBodyMatchFields() {
+    const matchType = document.getElementById('bodyMatchType').value;
+    const valueField = document.getElementById('bodyMatchValue');
+    valueField.style.display = matchType === 'none' ? 'none' : 'block';
+}
+
+function buildMockFromForm() {
+    const mock = {
+        request: { method: document.getElementById('mockMethod').value },
+        response: { status: parseInt(document.getElementById('mockStatus').value) || 200 }
+    };
+    
+    // URL - check urlPattern field first, then url field
+    const urlPattern = document.getElementById('mockUrlPattern').value.trim();
+    const url = document.getElementById('mockUrl').value.trim();
+    if (urlPattern) {
+        mock.request.urlPattern = urlPattern;
+    } else if (url) {
+        mock.request.url = url;
+    }
+    
+    // Priority
+    const priority = parseInt(document.getElementById('mockPriority').value);
+    if (priority && priority !== 5) mock.priority = priority;
+    
+    // Persistent
+    if (document.getElementById('mockPersistent').checked) {
+        mock.persistent = true;
+    }
+    
+    // Query Parameters - from UI elements
+    const queryParams = {};
+    document.querySelectorAll('#queryParamsList .param-row').forEach(row => {
+        const name = row.querySelector('.param-name').value.trim();
+        const value = row.querySelector('.param-value').value.trim();
+        if (name && value) {
+            queryParams[name] = { equalTo: value };
+        }
+    });
+    if (Object.keys(queryParams).length > 0) {
+        mock.request.queryParameters = queryParams;
+    }
+    
+    // Body Matching
+    const bodyMatchType = document.getElementById('bodyMatchType').value;
+    const bodyMatchValue = document.getElementById('bodyMatchValue').value.trim();
+    if (bodyMatchType !== 'none' && bodyMatchValue) {
+        mock.request.bodyPatterns = [{ [bodyMatchType]: bodyMatchValue }];
+    }
+    
+    // Response Body
+    const responseBody = document.getElementById('mockResponseBody').value.trim();
+    if (responseBody) mock.response.body = responseBody;
+    
+    // Body File
+    const bodyFile = document.getElementById('mockBodyFile').value.trim();
+    if (bodyFile) {
+        mock.response.bodyFileName = bodyFile;
+        delete mock.response.body;
+    }
+    
+    // Headers - from UI elements
+    const headers = {};
+    document.querySelectorAll('#responseHeadersList .header-row').forEach(row => {
+        const name = row.querySelector('.header-name').value.trim();
+        const value = row.querySelector('.header-value').value.trim();
+        if (name && value) {
+            headers[name] = value;
+        }
+    });
+    if (Object.keys(headers).length > 0) {
+        mock.response.headers = headers;
+    }
+    
+    // Delay
+    const delay = parseInt(document.getElementById('mockDelay').value);
+    if (delay > 0) mock.response.fixedDelayMilliseconds = delay;
+    
+    return mock;
+}
+
+function populateFormFromMock(mock) {
+    // Clear existing dynamic fields
+    document.getElementById('queryParamsList').innerHTML = '';
+    document.getElementById('responseHeadersList').innerHTML = '';
+    
+    if (mock.request) {
+        document.getElementById('mockMethod').value = mock.request.method || 'GET';
+        document.getElementById('mockUrl').value = mock.request.url || '';
+        document.getElementById('mockUrlPattern').value = mock.request.urlPattern || mock.request.urlPathPattern || '';
+        
+        // Query Parameters
+        if (mock.request.queryParameters) {
+            Object.entries(mock.request.queryParameters).forEach(([name, config]) => {
+                addQueryParam();
+                const rows = document.querySelectorAll('#queryParamsList .param-row');
+                const lastRow = rows[rows.length - 1];
+                lastRow.querySelector('.param-name').value = name;
+                lastRow.querySelector('.param-value').value = config.equalTo || config.matches || '';
+            });
+        }
+        
+        // Body Pattern
+        if (mock.request.bodyPatterns && mock.request.bodyPatterns[0]) {
+            const pattern = mock.request.bodyPatterns[0];
+            const matchType = Object.keys(pattern)[0];
+            document.getElementById('bodyMatchType').value = matchType || 'none';
+            document.getElementById('bodyMatchValue').value = pattern[matchType] || '';
+            updateBodyMatchFields();
+        } else {
+            document.getElementById('bodyMatchType').value = 'none';
+            updateBodyMatchFields();
+        }
+    }
+    
+    if (mock.response) {
+        document.getElementById('mockStatus').value = mock.response.status || 200;
+        document.getElementById('mockResponseBody').value = mock.response.body || '';
+        document.getElementById('mockBodyFile').value = mock.response.bodyFileName || '';
+        document.getElementById('mockDelay').value = mock.response.fixedDelayMilliseconds || 0;
+        
+        // Headers
+        if (mock.response.headers) {
+            Object.entries(mock.response.headers).forEach(([name, value]) => {
+                addResponseHeader();
+                const rows = document.querySelectorAll('#responseHeadersList .header-row');
+                const lastRow = rows[rows.length - 1];
+                lastRow.querySelector('.header-name').value = name;
+                lastRow.querySelector('.header-value').value = value;
+            });
+        } else {
+            // Add default Content-Type header
+            addResponseHeader();
+            const row = document.querySelector('#responseHeadersList .header-row');
+            row.querySelector('.header-name').value = 'Content-Type';
+            row.querySelector('.header-value').value = 'application/json';
+        }
+        updateRemoveButtons();
+    }
+    
+    document.getElementById('mockPriority').value = mock.priority || 5;
+    document.getElementById('mockPersistent').checked = mock.persistent === true;
+}
+
+// Start auto-refresh
+startAutoRefresh();
+
+// Load summary on page load
+window.onload = getSummary;
+
+    </script>
+<footer style="text-align:center;padding:24px 0 16px;font-size:12px;color:#334155;">WireMock Dashboard &middot; Powered by <a href="https://wiremock.org" target="_blank" rel="noopener" style="color:#6366f1;text-decoration:none;">WireMock</a> &middot; Built by <a href="https://github.com/ostbergjohan" target="_blank" rel="noopener" style="color:#6366f1;text-decoration:none;">Johan Ostberg</a></footer>
+</body>
+</html>

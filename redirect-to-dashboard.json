@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/"
+  },
+  "response": {
+    "status": 302,
+    "headers": {
+      "Location": "/__admin/dashboard"
+    }
+  },
+  "priority": 1
+}
