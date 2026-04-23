@@ -80,9 +80,26 @@ public class ResponseTimeTracker extends PostServeAction {
         return result;
     }
 
+    private static final java.util.regex.Pattern UUID_PATTERN =
+        java.util.regex.Pattern.compile(
+            "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}");
+
+    private String normalizePathSegments(String path) {
+        String[] segments = path.split("/", -1);
+        for (int i = 0; i < segments.length; i++) {
+            String seg = segments[i];
+            if (UUID_PATTERN.matcher(seg).matches()) {
+                segments[i] = "{id}";
+            } else if (seg.matches("\\d{5,}")) {
+                segments[i] = "{id}";
+            }
+        }
+        return String.join("/", segments);
+    }
+
     private String getStubPattern(String method, String url) {
         String[] parts = url.split("\\?", 2);
-        String basePath = parts[0];
+        String basePath = normalizePathSegments(parts[0]);
         if (parts.length > 1) {
             String[] params = parts[1].split("&");
             List<String> paramNames = new ArrayList<>();
