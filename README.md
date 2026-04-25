@@ -4,7 +4,11 @@ WireMock with a visual dashboard for managing stubs, request analytics, and Prom
 
 ## Screenshots
 
-![Dashboard](screenshot/wiremock-server.png)
+![Landing page](screenshot/wiremock-server.png)
+
+![Dashboard](screenshot/dashboard.png)
+
+![Mocks](screenshot/mocks.png)
 
 ## Quick start
 
