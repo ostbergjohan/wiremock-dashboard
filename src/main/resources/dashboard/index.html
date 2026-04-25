@@ -7,7 +7,6 @@
     <meta name="theme-color" content="#1E1B4B">
     <link rel="icon" type="image/svg+xml" href="/__admin/favicon.svg">
     <title>WireMock Mock Dashboard - WireMock Analytics</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
 
 :root {
@@ -122,40 +121,56 @@ body {
     border-color: rgba(129,140,248,0.5);
 }
 
-/* Tabs - pill style */
-.tabs {
-    display: flex;
-    gap: 4px;
-    margin-bottom: 20px;
-    background: #1A1830;
-    padding: 5px;
-    border-radius: 10px;
-    width: fit-content;
-    border: 1px solid rgba(129,140,248,0.12);
-}
-
-.tab {
-    padding: 7px 18px;
-    background: transparent;
-    border: none;
-    border-radius: 7px;
+.header-reset {
+    flex-shrink: 0;
+    background: rgba(220,38,38,0.12);
+    border: 1px solid rgba(220,38,38,0.3);
+    color: #fca5a5;
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
     font-size: 13px;
-    font-weight: 500;
-    color: rgba(165,180,252,0.65);
     transition: all var(--transition-fast);
 }
 
+.header-reset:hover {
+    background: rgba(220,38,38,0.22);
+    border-color: rgba(220,38,38,0.5);
+    color: #fff;
+}
+
+/* Tabs */
+.tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.tab {
+    padding: 8px 16px;
+    background: rgba(79,70,229,0.1);
+    border: 1px solid rgba(79,70,229,0.3);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: #a5b4fc;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+}
+
 .tab:hover {
-    color: #c7d2fe;
-    background: rgba(129,140,248,0.1);
+    background: rgba(79,70,229,0.25);
+    border-color: rgba(79,70,229,0.6);
+    color: #e0e7ff;
 }
 
 .tab.active {
     color: #fff;
     background: var(--color-primary);
+    border-color: var(--color-primary);
     font-weight: 600;
-    box-shadow: 0 2px 8px rgba(79,70,229,0.5);
 }
 
 .tab-content { display: none; }
@@ -252,7 +267,7 @@ body {
 }
 
 button.action-btn {
-    padding: 9px 16px;
+    padding: 8px 16px;
     font-size: 13px;
     cursor: pointer;
     background: rgba(79,70,229,0.15);
@@ -303,97 +318,135 @@ button.action-btn.small {
     font-size: 12px;
 }
 
+a.github-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 10px;
+    text-decoration: none;
+    color: #fff;
+}
+
 /* Output */
 #output {
+    border-radius: 10px;
+    min-height: 60px;
+    overflow-y: auto;
+}
+
+#output.plain {
     background: #0D0C1A;
     border: 1px solid rgba(129,140,248,0.15);
     padding: 16px 20px;
-    border-radius: 10px;
     white-space: pre-wrap;
     font-family: var(--font-mono);
     font-size: 12.5px;
     color: #a5b4fc;
-    min-height: 200px;
     max-height: 500px;
-    overflow-y: auto;
+}
+
+.output-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.output-table th {
+    background: #13122a;
+    color: #c7d2fe;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid rgba(129,140,248,0.2);
+}
+
+.output-table th.num { text-align: right; }
+
+.output-table td {
+    padding: 9px 14px;
+    border-bottom: 1px solid rgba(129,140,248,0.07);
+    color: #a5b4fc;
+}
+
+.output-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+.output-table tbody tr:hover { background: rgba(129,140,248,0.06); }
+
+.output-table .bar-cell { width: 100px; }
+
+.output-bar {
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(99,102,241,0.25);
+    position: relative;
+    overflow: hidden;
+}
+
+.output-bar-fill {
+    position: absolute;
+    top: 0; left: 0; height: 100%;
+    background: #6366f1;
+    border-radius: 2px;
 }
 
 /* Stats Cards */
 .stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 12px;
-    margin: 16px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 12px 0;
 }
 
 .stat-card {
-    background: #1A1830;
-    border: 1px solid rgba(129,140,248,0.15);
-    padding: 20px;
-    border-radius: 12px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    transition: border-color 0.15s ease;
-}
-
-.stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--color-primary), #818cf8);
-    opacity: 0.6;
+    background: #13122a;
+    border: 1px solid rgba(129,140,248,0.1);
+    border-left: 3px solid rgba(99,102,241,0.5);
+    padding: 8px 14px;
+    border-radius: 6px;
+    text-align: left;
+    flex: 1 1 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    transition: border-color 0.15s ease, background 0.15s ease;
 }
 
 .stat-card:hover {
-    border-color: rgba(129,140,248,0.4);
+    background: #1a1840;
+    border-left-color: rgba(129,140,248,0.9);
 }
 
 .stat-card-highlight {
-    background: linear-gradient(135deg, rgba(79,70,229,0.25) 0%, rgba(49,46,129,0.3) 100%);
-    border-color: rgba(129,140,248,0.35);
-}
-
-.stat-card-highlight::before {
-    opacity: 1;
+    border-left-color: #6366f1;
 }
 
 .stat-card-highlight .stat-number {
-    color: #e0e7ff;
-    font-size: 32px;
+    color: #c7d2fe;
 }
 
 .stat-card-highlight .stat-label {
-    color: rgba(165,180,252,0.85);
+    color: rgba(165,180,252,0.7);
 }
 
 .stat-number {
-    font-size: 28px;
-    font-weight: 700;
+    font-size: 15px;
+    font-weight: 600;
     color: #a5b4fc;
+    line-height: 1;
+    letter-spacing: -0.2px;
 }
 
 .stat-label {
-    color: #64748b;
-    margin-top: 6px;
-    font-size: 11px;
-    font-weight: 600;
+    color: #475569;
+    font-size: 10px;
+    font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 0.6px;
+    letter-spacing: 0.4px;
 }
-
-/* Chart */
-.chart-container {
-    background: #1A1830;
-    border: 1px solid rgba(129,140,248,0.15);
-    padding: 16px 20px;
-    border-radius: 12px;
-    margin: 16px 0;
-    height: 420px;
-}
-
-canvas { max-height: 360px; }
 
 /* Auto-refresh */
 .auto-refresh {
@@ -434,6 +487,43 @@ canvas { max-height: 360px; }
     color: var(--color-secondary);
     font-weight: bold;
     font-size: 14px;
+}
+
+.table-scroll {
+    overflow-x: auto;
+    margin-top: 12px;
+}
+
+.api-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+    color: #e0e7ff;
+}
+
+.api-table th,
+.api-table td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid rgba(129,140,248,0.18);
+    color: #e0e7ff;
+    vertical-align: top;
+}
+
+.api-table th {
+    color: #c7d2fe;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-bottom: 2px solid rgba(129,140,248,0.30);
+}
+
+.api-table tbody tr:nth-child(odd) {
+    background: rgba(255,255,255,0.03);
+}
+
+.api-table tbody tr:hover {
+    background: rgba(129,140,248,0.08);
 }
 
 /* Stubs Tab */
@@ -1113,11 +1203,13 @@ canvas { max-height: 360px; }
                 <h1>WireMock Mock Dashboard</h1>
                 <div class="subtitle">Real-time WireMock Analytics & Monitoring</div>
             </div>
-            <a href="/" class="header-home" title="Back to info page">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <button class="action-btn" onclick="switchTab('api')">API</button>
+            <button class="action-btn reset header-reset" onclick="resetCounters()">Reset Counters</button>
+            <a href="https://github.com/ostbergjohan" target="_blank" rel="noopener" class="action-btn github-btn" title="GitHub">
+                <svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
             </a>
         </div>
-        
+
         <div class="tabs">
             <button class="tab active" onclick="switchTab('dashboard')">Dashboard</button>
             <button class="tab" onclick="switchTab('mocks')">Mocks</button>
@@ -1128,26 +1220,48 @@ canvas { max-height: 360px; }
         <div id="dashboard" class="tab-content active">
             <div class="stats" id="stats"></div>
             
-            <div class="chart-container">
-                <canvas id="stubChart"></canvas>
-            </div>
-            
             <div class="button-group">
-                <button class="action-btn" onclick="getStubCounts()">Mock Counts</button>
-                <button class="action-btn" onclick="getUrlCounts()">URL Counts</button>
-                <button class="action-btn" onclick="getResponseTimes()">Response Times</button>
                 <button class="action-btn" onclick="getSummary()">Summary</button>
-                <button class="action-btn" id="pauseBtn" onclick="toggleAutoRefresh()">⏸️ Pause</button>
-                <button class="action-btn reset" onclick="resetCounters()">Reset Counters</button>
             </div>
 
             <div id="output">Click a button to load data...</div>
             
             <div class="auto-refresh">
-                <span class="icon">&#8635;</span> Auto-refreshing every 10 seconds (click Pause to stop)
+                <span class="icon">&#8635;</span> Auto-refreshing every 10 seconds
             </div>
         </div>
-        
+
+        <!-- API Reference Tab -->
+        <div id="api" class="tab-content">
+            <div class="info-section">
+                <h2>Admin API Reference</h2>
+                <p>Use the WireMock admin endpoints below to manage mappings, counters, metrics, and unmatched requests.</p>
+                <div class="table-scroll">
+                    <table class="api-table" role="table" aria-label="Admin API endpoints">
+                        <thead>
+                            <tr><th scope="col">Method</th><th scope="col">Endpoint</th><th scope="col">Description</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><span class="method get">GET</span></td><td class="path">/__admin/dashboard</td><td>Dashboard UI</td></tr>
+                            <tr><td><span class="method get">GET</span></td><td class="path">/__admin/mappings</td><td>List all stub mappings</td></tr>
+                            <tr><td><span class="method post">POST</span></td><td class="path">/__admin/mappings</td><td>Create a new stub mapping</td></tr>
+                            <tr><td><span class="method post">POST</span></td><td class="path">/__admin/mappings/import</td><td>Bulk import stubs</td></tr>
+                            <tr><td><span class="method delete">DELETE</span></td><td class="path">/__admin/mappings</td><td>Delete all stub mappings</td></tr>
+                            <tr><td><span class="method get">GET</span></td><td class="path">/__admin/stub-counter</td><td>Request counts per stub pattern</td></tr>
+                            <tr><td><span class="method get">GET</span></td><td class="path">/__admin/stub-counter/urls</td><td>Request counts per exact URL</td></tr>
+                            <tr><td><span class="method get">GET</span></td><td class="path">/__admin/stub-counter/summary</td><td>Text summary with percentages</td></tr>
+                            <tr><td><span class="method get">GET</span></td><td class="path">/__admin/response-times</td><td>Response time statistics</td></tr>
+                            <tr><td><span class="method post">POST</span></td><td class="path">/__admin/reset-stub-counter</td><td>Reset counters and response times</td></tr>
+                            <tr><td><span class="method get">GET</span></td><td class="path">/__admin/server-metrics</td><td>JVM metrics</td></tr>
+                            <tr><td><span class="method get">GET</span></td><td class="path">/__admin/metrics</td><td>Prometheus metrics</td></tr>
+                            <tr><td><span class="method get">GET</span></td><td class="path">/__admin/unmatched-requests</td><td>Unmatched request log</td></tr>
+                            <tr><td><span class="method delete">DELETE</span></td><td class="path">/__admin/unmatched-requests</td><td>Clear unmatched request log</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <!-- Mocks Tab -->
         <div id="mocks" class="tab-content">
             <div class="stubs-header">
@@ -1347,7 +1461,6 @@ canvas { max-height: 360px; }
     </div>
 
     <script>
-        let chartInstance = null;
 let autoRefreshInterval = null;
 let allStubs = [];
 let currentEditingStubId = null;
@@ -1369,19 +1482,14 @@ function switchTab(tabName) {
     contents.forEach(content => content.classList.remove('active'));
     document.getElementById(tabName).classList.add('active');
     
-    // Manage auto-refresh and load data based on active tab
     if (tabName === 'dashboard') {
         startAutoRefresh();
+        getSummary();
     } else {
         stopAutoRefresh();
     }
-    
-    if (tabName === 'mocks') {
-        loadStubs();
-    }
-    if (tabName === 'unmatched') {
-        loadUnmatched();
-    }
+
+    if (tabName === 'mocks') loadStubs();
 }
 
 function switchTabByName(tabName) {
@@ -1394,9 +1502,8 @@ function switchTabByName(tabName) {
     const contents = document.querySelectorAll('.tab-content');
     contents.forEach(content => content.classList.remove('active'));
     document.getElementById(tabName).classList.add('active');
-    if (tabName === 'dashboard') startAutoRefresh(); else stopAutoRefresh();
+    if (tabName === 'dashboard') { startAutoRefresh(); getSummary(); } else stopAutoRefresh();
     if (tabName === 'mocks') loadStubs();
-    if (tabName === 'unmatched') loadUnmatched();
 }
 
 function startAutoRefresh() {
@@ -1544,70 +1651,64 @@ function renderUnmatched(items) {
             </div>`;
         return;
     }
-    list.innerHTML = items.map((r, i) => {
+
+    const rows = items.map((r, i) => {
         const detailId = 'ud-' + i;
         const color    = methodColor(r.method);
         const txtColor = r.method === 'PUT' ? 'color:#333;' : '';
         const count    = r.count || 1;
-
-        const countBadge = count > 1
-            ? `<span title="${count} identiska anrop" style="background:var(--color-error);color:#fff;font-size:11px;font-weight:700;padding:2px 9px;border-radius:12px;flex-shrink:0;">&times;${count}</span>`
-            : '';
-
-        const timeLabel = count > 1
-            ? `<span class="unmatched-time">${formatTimestamp(r.lastSeen || r.timestamp)} &mdash; senast</span>`
-            : `<span class="unmatched-time">${formatTimestamp(r.timestamp)}</span>`;
+        const mockIdx  = r.originalIndex !== undefined ? r.originalIndex : i;
+        const time     = count > 1
+            ? formatTimestamp(r.lastSeen || r.timestamp) + ' (last)'
+            : formatTimestamp(r.timestamp);
 
         const headersRows = r.headers && Object.keys(r.headers).length > 0
             ? Object.entries(r.headers).map(([k, v]) =>
-                `<tr><td>${escapeHtml(k)}</td><td>${escapeHtml(v)}</td></tr>`).join('')
+                `<tr><td style="color:#94a3b8;width:200px;">${escapeHtml(k)}</td><td>${escapeHtml(v)}</td></tr>`).join('')
             : '<tr><td colspan="2" style="color:var(--color-text-muted);font-style:italic;">No headers captured</td></tr>';
 
-        const bodySection = r.body ? `
-            <div class="unmatched-detail-section">
-                <div class="unmatched-detail-label">Request Body</div>
-                <pre class="unmatched-body-pre">${escapeHtml(r.body)}</pre>
-            </div>` : '';
-
-        const firstSeenNote = count > 1
-            ? `<div style="margin-top:8px;font-size:12px;color:var(--color-text-muted);">Sedd sedan: ${escapeHtml(r.firstSeen || '')}</div>`
+        const bodySection = r.body
+            ? `<div style="margin-top:10px;"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:#94a3b8;margin-bottom:4px;">Body</div><pre class="unmatched-body-pre">${escapeHtml(r.body)}</pre></div>`
             : '';
 
-        const mockIdx = r.originalIndex !== undefined ? r.originalIndex : i;
+        const firstSeenNote = count > 1
+            ? `<div style="margin-top:8px;font-size:12px;color:var(--color-text-muted);">First seen: ${escapeHtml(r.firstSeen || '')}</div>`
+            : '';
 
-        return `
-        <div class="unmatched-card">
-            <div class="unmatched-card-header" onclick="toggleUnmatchedDetail('${detailId}')" role="button" aria-expanded="false" aria-controls="${detailId}">
-                <span class="unmatched-method" style="background:${color};${txtColor}">${escapeHtml(r.method)}</span>
-                ${countBadge}
-                <span class="unmatched-url">${escapeHtml(r.url)}</span>
-                ${timeLabel}
-                <button class="action-btn small" style="background:var(--color-primary);flex-shrink:0;"
-                    onclick="event.stopPropagation();createMockFromUnmatched(${mockIdx})"
-                    title="Skapa stub från detta anrop">+ Create Mock</button>
-                <span class="unmatched-expand-icon" id="${detailId}-arrow">&#9660;</span>
-            </div>
-            <div id="${detailId}" class="unmatched-card-detail">
-                <div class="unmatched-detail-section">
-                    <div class="unmatched-detail-label">Request Headers${count > 1 ? ' <span style="font-weight:400;font-style:italic;">(senaste anropet)</span>' : ''}</div>
-                    <table class="unmatched-headers-table">${headersRows}</table>
+        return `<tr class="unmatched-row" onclick="toggleUnmatchedDetail('${detailId}')" style="cursor:pointer;">
+            <td><span class="unmatched-method" style="background:${color};${txtColor}">${escapeHtml(r.method)}</span></td>
+            <td><span class="stub-url">${escapeHtml(r.url)}</span>${count > 1 ? ` <span style="background:var(--color-error);color:#fff;font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;margin-left:6px;">&times;${count}</span>` : ''}</td>
+            <td style="white-space:nowrap;color:#64748b;font-size:12px;">${time}</td>
+            <td style="white-space:nowrap;">
+                <div style="display:flex;gap:6px;align-items:center;">
+                    <button class="action-btn small" onclick="event.stopPropagation();createMockFromUnmatched(${mockIdx})">+ Create Mock</button>
+                    <span class="unmatched-expand-icon" id="${detailId}-arrow">&#9660;</span>
                 </div>
+            </td>
+        </tr>
+        <tr id="${detailId}" style="display:none;">
+            <td colspan="4" style="background:#0d0c1a;padding:14px 18px;border-bottom:1px solid rgba(129,140,248,0.1);">
+                <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:#94a3b8;margin-bottom:6px;">Headers</div>
+                <table class="unmatched-headers-table">${headersRows}</table>
                 ${bodySection}
                 ${firstSeenNote}
-            </div>
-        </div>`;
+            </td>
+        </tr>`;
     }).join('');
+
+    list.innerHTML = `<table class="output-table">
+        <thead><tr><th>Method</th><th>URL</th><th>Time</th><th></th></tr></thead>
+        <tbody>${rows}</tbody>
+    </table>`;
 }
 
 function toggleUnmatchedDetail(id) {
-    const el     = document.getElementById(id);
-    const arrow  = document.getElementById(id + '-arrow');
-    const header = el && el.previousElementSibling;
+    const el    = document.getElementById(id);
+    const arrow = document.getElementById(id + '-arrow');
     if (!el) return;
-    const open = el.style.display !== 'block';
-    el.style.display = open ? 'block' : 'none';
-    if (arrow)  arrow.innerHTML = open ? '&#9650;' : '&#9660;';
-    if (header) header.setAttribute('aria-expanded', String(open));
+    const open = el.style.display !== 'table-row';
+    el.style.display = open ? 'table-row' : 'none';
+    if (arrow) arrow.innerHTML = open ? '&#9650;' : '&#9660;';
 }
 
 function createMockFromUnmatched(index) {
@@ -1706,56 +1807,49 @@ async function loadStubs() {
 
 function displayStubs(stubs) {
     const stubsGrid = document.getElementById('stubsGrid');
-    
+
     if (stubs.length === 0) {
         stubsGrid.innerHTML = '<div class="no-stubs">No stubs match your search.</div>';
         return;
     }
-    
-    let html = '';
-    
-    stubs.forEach(stub => {
-        const request = stub.request || {};
+
+    const rows = stubs.map(stub => {
+        const request  = stub.request  || {};
         const response = stub.response || {};
-        const method = request.method || 'ANY';
-        const url = request.url || request.urlPattern || request.urlPath || request.urlPathPattern || 'N/A';
+        const method   = request.method || 'ANY';
+        const url      = request.url || request.urlPattern || request.urlPath || request.urlPathPattern || 'N/A';
         const priority = stub.priority || 5;
-        const id = stub.id || stub.uuid || 'N/A';
-        const status = response.status || 200;
+        const id       = stub.id || stub.uuid || 'N/A';
+        const status   = response.status || 200;
         const isPersistent = stub.persistent === true;
-        
+
         let statusClass = 'status-200';
         if (status >= 400 && status < 500) statusClass = 'status-400';
         if (status >= 500) statusClass = 'status-500';
-        
-        const persistentBadge = isPersistent ? '<span style="background: #7AB800; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">PERSISTENT</span>' : '';
-        
-        html += `
-            <div class="stub-card">
-                <div class="stub-card-header">
-                    <div class="stub-card-left">
-                        <div>
-                            <span class="stub-method method-${method}">${method}</span>
-                            <span class="stub-url">${url}</span>
-                            ${persistentBadge}
-                        </div>
-                        <div class="stub-id">ID: ${id}</div>
-                    </div>
-                    <div class="stub-card-right">
-                        <span class="stub-priority">Priority: ${priority}</span>
-                        <span class="stub-response-status ${statusClass}">${status}</span>
-                        <div class="stub-actions">
-                            <button class="action-btn small" onclick="viewStub('${id}')">View</button>
-                            <button class="action-btn small" onclick="editStub('${id}')">Edit</button>
-                            <button class="action-btn small reset" onclick="deleteStub('${id}')">Delete</button>
-                        </div>
-                    </div>
+
+        const persistentBadge = isPersistent
+            ? '<span style="background:#7AB800;color:#fff;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;margin-left:6px;">PERSISTENT</span>'
+            : '';
+
+        return `<tr>
+            <td><span class="stub-method method-${method}">${method}</span></td>
+            <td><span class="stub-url">${url}</span>${persistentBadge}</td>
+            <td class="num"><span class="stub-response-status ${statusClass}">${status}</span></td>
+            <td class="num">${priority}</td>
+            <td style="white-space:nowrap;">
+                <div class="stub-actions">
+                    <button class="action-btn small" onclick="viewStub('${id}')">View</button>
+                    <button class="action-btn small" onclick="editStub('${id}')">Edit</button>
+                    <button class="action-btn small reset" onclick="deleteStub('${id}')">Delete</button>
                 </div>
-            </div>
-        `;
-    });
-    
-    stubsGrid.innerHTML = html;
+            </td>
+        </tr>`;
+    }).join('');
+
+    stubsGrid.innerHTML = `<table class="output-table">
+        <thead><tr><th>Method</th><th>URL / Pattern</th><th class="num">Status</th><th class="num">Priority</th><th></th></tr></thead>
+        <tbody>${rows}</tbody>
+    </table>`;
 }
 
 function filterStubs() {
@@ -2142,120 +2236,30 @@ function closeEditModal() {
     currentEditingStubId = null;
 }
 
-const CHART_MAX_BARS = 30; // max bars before collapsing remainder into "Others"
-
-function trimChartData(data) {
-    const stubData = data.counts || {};
-    // Sort by count descending
-    const sorted = Object.entries(stubData).sort((a, b) => b[1] - a[1]);
-    const total = sorted.reduce((s, [, v]) => s + v, 0);
-
-    if (sorted.length <= CHART_MAX_BARS) {
-        return { labels: sorted.map(([k]) => k), values: sorted.map(([, v]) => v), total, trimmed: false, hidden: 0 };
+function renderCountsTable(counts, total, label) {
+    const out = document.getElementById('output');
+    out.className = '';
+    const entries = Object.entries(counts || {}).sort((a, b) => b[1] - a[1]);
+    if (entries.length === 0) {
+        out.className = 'plain';
+        out.textContent = 'No data yet. Send some requests first.';
+        return;
     }
-
-    const top = sorted.slice(0, CHART_MAX_BARS);
-    const othersCount = sorted.slice(CHART_MAX_BARS).reduce((s, [, v]) => s + v, 0);
-    const othersKeys  = sorted.length - CHART_MAX_BARS;
-    top.push([`Others (${othersKeys} more patterns)`, othersCount]);
-
-    return {
-        labels: top.map(([k]) => k),
-        values: top.map(([, v]) => v),
-        total,
-        trimmed: true,
-        hidden: othersKeys
-    };
-}
-
-function createStackedBarChart(data) {
-    const ctx = document.getElementById('stubChart').getContext('2d');
-    
-    if (chartInstance) {
-        chartInstance.destroy();
-    }
-
-    const { labels, values, total, trimmed, hidden } = trimChartData(data);
-
-    const titleText = trimmed
-        ? `Top ${CHART_MAX_BARS} Patterns by Count  (${hidden} more patterns hidden)`
-        : 'Request Distribution by Stub Pattern (Sorted by Count)';
-
-    // Last bar is "Others" — give it a neutral colour
-    const colors = generateColors(labels.length);
-    if (trimmed) colors[colors.length - 1] = 'hsla(0, 0%, 60%, 0.7)';
-    
-    chartInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Request Count',
-                data: values,
-                backgroundColor: colors,
-                borderColor: colors.map(c => c.replace('0.7', '1')),
-                borderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                title: {
-                    display: true,
-                    text: titleText,
-                    font: { size: 16, weight: 'bold' },
-                    padding: 16
-                },
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const count = context.parsed.y;
-                            const percentage = ((count / total) * 100).toFixed(2);
-                            return `Count: ${count.toLocaleString()} (${percentage}%)`;
-                        }
-                    },
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    padding: 12,
-                    titleFont: { size: 13, weight: 'bold' },
-                    bodyFont: { size: 13 }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function(value) { return value.toLocaleString(); },
-                        font: { size: 12 }
-                    },
-                    grid: { color: 'rgba(0, 0, 0, 0.05)' }
-                },
-                x: {
-                    ticks: {
-                        autoSkip: false,
-                        maxRotation: 45,
-                        minRotation: 45,
-                        font: { size: 11 },
-                        callback: function(value, index) {
-                            const label = this.getLabelForValue(index);
-                            return label.length > 50 ? label.substring(0, 48) + '…' : label;
-                        }
-                    },
-                    grid: { display: false }
-                }
-            }
-        }
-    });
-}
-
-function generateColors(count) {
-    const colors = [];
-    for (let i = 0; i < count; i++) {
-        const hue = (i * 360 / count) % 360;
-        colors.push(`hsla(${hue}, 70%, 60%, 0.7)`);
-    }
-    return colors;
+    const max = entries[0][1];
+    const rows = entries.map(([pattern, hits]) => {
+        const pct = total > 0 ? ((hits / total) * 100).toFixed(1) : '0.0';
+        const barPct = max > 0 ? ((hits / max) * 100).toFixed(1) : '0';
+        return `<tr>
+            <td>${pattern}</td>
+            <td class="num">${hits.toLocaleString()}</td>
+            <td class="num">${pct}%</td>
+            <td class="bar-cell"><div class="output-bar"><div class="output-bar-fill" style="width:${barPct}%"></div></div></td>
+        </tr>`;
+    }).join('');
+    out.innerHTML = `<table class="output-table">
+        <thead><tr><th>${label}</th><th class="num">Hits</th><th class="num">% of Total</th><th></th></tr></thead>
+        <tbody>${rows}</tbody>
+    </table>`;
 }
 
 async function getStubCounts() {
@@ -2263,11 +2267,12 @@ async function getStubCounts() {
     try {
         const response = await fetch('/__admin/stub-counter');
         const data = await response.json();
-        document.getElementById('output').textContent = JSON.stringify(data, null, 2);
-        try { createStackedBarChart(data); } catch (chartError) { console.warn('Chart rendering failed:', chartError.message); }
+        renderCountsTable(data.counts, data.total, 'Mock Pattern');
         updateStats(data.total, Object.keys(data.counts || {}).length, null);
     } catch (error) {
-        document.getElementById('output').textContent = 'Error: ' + error.message;
+        const out = document.getElementById('output');
+        out.className = 'plain';
+        out.textContent = 'Error: ' + error.message;
     }
 }
 
@@ -2276,34 +2281,26 @@ async function getUrlCounts() {
     try {
         const response = await fetch('/__admin/stub-counter/urls');
         const data = await response.json();
-        document.getElementById('output').textContent = JSON.stringify(data, null, 2);
-        try { createStackedBarChart(data); } catch (chartError) { console.warn('Chart rendering failed:', chartError.message); }
+        renderCountsTable(data.counts, data.total, 'URL');
         updateStats(data.total, null, Object.keys(data.counts || {}).length);
     } catch (error) {
-        document.getElementById('output').textContent = 'Error: ' + error.message;
+        const out = document.getElementById('output');
+        out.className = 'plain';
+        out.textContent = 'Error: ' + error.message;
     }
 }
 
 async function getSummary() {
     lastAction = 'getSummary';
     try {
-        // Get JSON data for chart
-        const jsonResponse = await fetch('/__admin/stub-counter');
-        const jsonData = await jsonResponse.json();
-        
-        // Get text summary for display
-        const textResponse = await fetch('/__admin/stub-counter/summary');
-        const textData = await textResponse.text();
-        
-        document.getElementById('output').textContent = textData;
-        try {
-            createStackedBarChart(jsonData);
-        } catch (chartError) {
-            console.warn('Chart rendering failed (Chart.js may not be loaded):', chartError.message);
-        }
-        updateStats(jsonData.total, Object.keys(jsonData.counts || {}).length, null);
+        const response = await fetch('/__admin/stub-counter');
+        const data = await response.json();
+        renderCountsTable(data.counts, data.total, 'Mock Pattern');
+        updateStats(data.total, Object.keys(data.counts || {}).length, null);
     } catch (error) {
-        document.getElementById('output').textContent = 'Error: ' + error.message;
+        const out = document.getElementById('output');
+        out.className = 'plain';
+        out.textContent = 'Error: ' + error.message;
     }
 }
 
@@ -2320,31 +2317,23 @@ async function getResponseTimes() {
             return;
         }
 
-        const lines = [];
-        lines.push('Response Times (ms)');
-        lines.push('='.repeat(100));
-        lines.push(
-            'Stub Pattern'.padEnd(60) +
-            'Count'.padStart(8) +
-            'Last'.padStart(8) +
-            'Min'.padStart(8) +
-            'Avg'.padStart(8) +
-            'Max'.padStart(8)
-        );
-        lines.push('-'.repeat(100));
-        for (const key of keys) {
+        const out = document.getElementById('output');
+        out.className = '';
+        const rows = keys.map(key => {
             const s = patterns[key];
-            lines.push(
-                (key.length > 58 ? key.substring(0, 55) + '...' : key).padEnd(60) +
-                String(s.count).padStart(8) +
-                String(s.last != null ? s.last : '-').padStart(8) +
-                String(s.min).padStart(8) +
-                String(s.avg).padStart(8) +
-                String(s.max).padStart(8)
-            );
-        }
-
-        document.getElementById('output').textContent = lines.join('\n');
+            return `<tr>
+                <td>${key}</td>
+                <td class="num">${s.count.toLocaleString()}</td>
+                <td class="num">${s.last != null ? s.last : '—'}</td>
+                <td class="num">${s.min}</td>
+                <td class="num">${s.avg}</td>
+                <td class="num">${s.max}</td>
+            </tr>`;
+        }).join('');
+        out.innerHTML = `<table class="output-table">
+            <thead><tr><th>Stub Pattern</th><th class="num">Hits</th><th class="num">Last (ms)</th><th class="num">Min (ms)</th><th class="num">Avg (ms)</th><th class="num">Max (ms)</th></tr></thead>
+            <tbody>${rows}</tbody>
+        </table>`;
 
         let totalSum = 0, totalCount = 0;
         for (const s of Object.values(patterns)) {
@@ -2513,19 +2502,11 @@ async function resetCounters() {
         const data = await response.json();
         document.getElementById('output').textContent = JSON.stringify(data, null, 2);
         document.getElementById('stats').innerHTML = '';
-        if (chartInstance) {
-            chartInstance.destroy();
-            chartInstance = null;
-        }
         alert('Counters reset successfully!');
     } catch (error) {
         document.getElementById('output').textContent = 'Error: ' + error.message;
         alert('Failed to reset counters: ' + error.message);
     }
-}
-
-async function refreshChart() {
-    await getSummary();
 }
 
 function switchModalTab(tabName) {
@@ -2756,6 +2737,5 @@ startAutoRefresh();
 window.onload = getSummary;
 
     </script>
-<footer style="text-align:center;padding:24px 0 16px;font-size:12px;color:#334155;">WireMock Dashboard &middot; Powered by <a href="https://wiremock.org" target="_blank" rel="noopener" style="color:#6366f1;text-decoration:none;">WireMock</a> &middot; Built by <a href="https://github.com/ostbergjohan" target="_blank" rel="noopener" style="color:#6366f1;text-decoration:none;">Johan Ostberg</a></footer>
 </body>
 </html>

@@ -3,6 +3,7 @@ package se.ostberg.wiremock.extension;
 import com.github.tomakehurst.wiremock.admin.Router;
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.common.Json;
+import com.github.tomakehurst.wiremock.common.Timing;
 import com.github.tomakehurst.wiremock.core.Admin;
 import com.github.tomakehurst.wiremock.extension.AdminApiExtension;
 import com.github.tomakehurst.wiremock.extension.PostServeAction;
@@ -90,17 +91,13 @@ public class WireMockExtensions extends PostServeAction
         }
 
         return switch (url) {
-            case "/" -> {
-                ResponseDefinition resp = new ResponseDefinition(
-                    200, null, INFO_PAGE, null, null, null,
-                    new HttpHeaders(
-                        new HttpHeader("Content-Type", "text/html; charset=utf-8"),
-                        new HttpHeader("Cache-Control", "no-cache")
-                    ),
-                    null, null, null, null, null, null, null, null, null, null, null
-                );
-                yield RequestFilterAction.stopWith(resp);
-            }
+            case "/" -> RequestFilterAction.stopWith(
+                new ResponseDefinitionBuilder()
+                    .withStatus(302)
+                    .withHeader("Location", "/__admin/dashboard")
+                    .withHeader("Cache-Control", "no-cache")
+                    .build()
+            );
             case "/favicon.ico" -> RequestFilterAction.stopWith(
                 new ResponseDefinitionBuilder()
                     .withStatus(204)
@@ -275,6 +272,7 @@ public class WireMockExtensions extends PostServeAction
         });
 
         router.add(RequestMethod.GET, "/stub-counter/summary", (admin, serveEvent, pathParams) -> {
+            // Use the same normalized stub pattern counts as Prometheus metrics.
             Map<String, Long> counts = getStubCounts();
             long total = counts.values().stream().mapToLong(Long::longValue).sum();
             if (total == 0) return new ResponseDefinition(200, "No requests recorded yet\n");
@@ -364,9 +362,26 @@ public class WireMockExtensions extends PostServeAction
     // =========================================================================
 
     private Map<String, Long> getStubCounts() {
+        return normalizeStubCounts(stubCounters);
+    }
+
+    private Map<String, Long> normalizeStubCounts(ConcurrentHashMap<String, AtomicLong> source) {
         Map<String, Long> result = new HashMap<>();
-        stubCounters.forEach((k, v) -> result.put(k, v.get()));
+        source.forEach((key, value) -> {
+            String normalizedKey = normalizeStubPatternKey(key);
+            result.merge(normalizedKey, value.get(), Long::sum);
+        });
         return result;
+    }
+
+    private String normalizeStubPatternKey(String key) {
+        int colonIndex = key.indexOf(':');
+        if (colonIndex <= 0) {
+            return key;
+        }
+        String method = key.substring(0, colonIndex);
+        String url = key.substring(colonIndex + 1);
+        return getStubPattern(method, url);
     }
 
     private Map<String, Long> getUrlCounts() {
