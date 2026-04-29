@@ -34,6 +34,17 @@ Dashboard available at `http://localhost:8080/__admin/dashboard`
 - Prometheus metrics at `/metrics`
 - JVM metrics at `/__admin/server-metrics`
 
+## Flags
+
+- port: 8080
+- enable-browser-proxying: false
+- disable-banner: false
+- no-request-journal: true
+- verbose: false
+- jetty-accept-queue-size: 100
+- jetty-acceptor-threads: 4
+- jetty-header-buffer-size: 16384
+
 ## Admin API
 
 | Method | Endpoint | Description |
